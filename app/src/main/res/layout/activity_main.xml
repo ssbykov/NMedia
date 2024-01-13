@@ -95,7 +95,7 @@
         android:contentDescription="@string/description_views_icon"
         app:layout_constraintEnd_toStartOf="@+id/textViews"
         app:layout_constraintTop_toBottomOf="@+id/content"
-        app:srcCompat="@drawable/ic_visibility_24" />
+        app:srcCompat="@drawable/ic_views_24" />
 
     <ImageButton
         android:id="@+id/likes"
@@ -106,7 +106,7 @@
         android:contentDescription="@string/description_likes_icon"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/content"
-        app:srcCompat="@drawable/ic_favorite_24" />
+        app:srcCompat="@drawable/ic_like_24" />
 
     <TextView
         android:id="@+id/textLikes"
