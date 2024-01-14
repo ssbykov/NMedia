@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     tools:context=".MainActivity">
 
     <ImageView
@@ -75,32 +74,32 @@
         tools:text="@sample/posts.json/data/content" />
 
     <ImageButton
-        android:id="@+id/shears"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:id="@+id/shear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_shears_icon"
-        app:layout_constraintStart_toEndOf="@+id/textLikes"
+        app:layout_constraintStart_toEndOf="@+id/likeCount"
         app:layout_constraintTop_toBottomOf="@+id/content"
         app:srcCompat="@drawable/ic_share_24" />
 
     <ImageButton
         android:id="@+id/views"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_views_icon"
-        app:layout_constraintEnd_toStartOf="@+id/textViews"
+        app:layout_constraintEnd_toStartOf="@+id/viewsCount"
         app:layout_constraintTop_toBottomOf="@+id/content"
         app:srcCompat="@drawable/ic_views_24" />
 
     <ImageButton
-        android:id="@+id/likes"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:id="@+id/like"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_margin="8dp"
         android:background="@android:color/transparent"
         android:contentDescription="@string/description_likes_icon"
@@ -109,25 +108,25 @@
         app:srcCompat="@drawable/ic_like_24" />
 
     <TextView
-        android:id="@+id/textLikes"
+        android:id="@+id/likeCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        app:layout_constraintStart_toEndOf="@+id/likes"
+        app:layout_constraintStart_toEndOf="@+id/like"
         app:layout_constraintTop_toBottomOf="@+id/content"
         tools:text="10" />
 
     <TextView
-        android:id="@+id/textShares"
+        android:id="@+id/shareCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        app:layout_constraintStart_toEndOf="@+id/shears"
+        app:layout_constraintStart_toEndOf="@+id/shear"
         app:layout_constraintTop_toBottomOf="@+id/content"
         tools:text="5" />
 
     <TextView
-        android:id="@+id/textViews"
+        android:id="@+id/viewsCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
