@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.utils.formatCount
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,11 +27,11 @@ class MainActivity : AppCompatActivity() {
                     if (post.likedByMe) R.drawable.ic_liked_24 else R.drawable.ic_like_24
                 )
 
-                likeCount.text = post.formatCount(post.likes)
+                likeCount.text = formatCount(post.likes)
             }
             shear.setOnClickListener {
                 post.shares++
-                shareCount.text = post.formatCount(post.shares)
+                shareCount.text = formatCount(post.shares)
             }
         }
     }
@@ -40,9 +41,9 @@ class MainActivity : AppCompatActivity() {
             author.text = post.author
             published.text = post.published
             content.text = post.content
-            likeCount.text = post.formatCount(post.likes)
-            shareCount.text = post.formatCount(post.shares)
-            viewsCount.text = post.formatCount(post.views)
+            likeCount.text = formatCount(post.likes)
+            shareCount.text = formatCount(post.shares)
+            viewsCount.text = formatCount(post.views)
             if (post.likedByMe) like.setImageResource(R.drawable.ic_liked_24)
         }
         setupClickListeners(binding, post)
