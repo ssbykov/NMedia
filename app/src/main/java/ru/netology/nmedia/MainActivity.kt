@@ -3,10 +3,10 @@ package ru.netology.nmedia
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.databinding.PostCardBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.utils.formatCount
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,14 +16,12 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val adapter = PostsAdapter { postBinding, post ->
+            setupClickListeners(postBinding, post)
+        }
+        binding.root.adapter = adapter
         viewModel.data.observe(this) { posts ->
-            binding.container.removeAllViews()
-            posts.forEach { post ->
-                PostCardBinding.inflate(layoutInflater, binding.container, true).apply {
-                    setViews(this, post)
-                    setupClickListeners(this, post)
-                }.root
-            }
+            adapter.list = posts
         }
     }
 
@@ -38,17 +36,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setViews(binding: PostCardBinding, post: Post) {
-        with(binding) {
-            author.text = post.author
-            published.text = post.published
-            content.text = post.content
-            likeCount.text = formatCount(post.likes)
-            shareCount.text = formatCount(post.shares)
-            viewsCount.text = formatCount(post.views)
-            if (post.likedByMe) {
-                like.setImageResource(R.drawable.ic_liked_24)
-            } else like.setImageResource(R.drawable.ic_like_24)
-        }
-    }
 }
