@@ -10,7 +10,10 @@ import ru.netology.nmedia.databinding.PostCardBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.utils.formatCount
 
-typealias SetupClickListeners = (binding: PostCardBinding, post: Post) -> Unit
+interface SetupClickListeners {
+    fun onLikeListener(post: Post)
+    fun onShareListener(post: Post)
+}
 
 class PostsAdapter(private val setupClickListeners: SetupClickListeners) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
@@ -33,7 +36,6 @@ object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
 
 }
 
-
 class PostViewHolder(
     private val binding: PostCardBinding,
     private val setupClickListeners: SetupClickListeners,
@@ -50,7 +52,12 @@ class PostViewHolder(
             like.setImageResource(
                 if (post.likedByMe) R.drawable.ic_liked_24 else R.drawable.ic_like_24
             )
-            setupClickListeners(this, post)
+            like.setOnClickListener {
+                setupClickListeners.onLikeListener(post)
+            }
+            shear.setOnClickListener {
+                setupClickListeners.onShareListener(post)
+            }
         }
 
     }

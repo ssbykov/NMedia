@@ -4,8 +4,8 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import ru.netology.nmedia.adapter.PostsAdapter
+import ru.netology.nmedia.adapter.SetupClickListeners
 import ru.netology.nmedia.databinding.ActivityMainBinding
-import ru.netology.nmedia.databinding.PostCardBinding
 import ru.netology.nmedia.dto.Post
 
 class MainActivity : AppCompatActivity() {
@@ -16,24 +16,18 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val adapter = PostsAdapter { postBinding, post ->
-            setupClickListeners(postBinding, post)
-        }
+        val adapter = PostsAdapter(object : SetupClickListeners {
+            override fun onLikeListener(post: Post) {
+                viewModel.likeById(post.id)
+            }
+            override fun onShareListener(post: Post) {
+                viewModel.shareById(post.id)
+            }
+        })
         binding.root.adapter = adapter
         viewModel.data.observe(this) { posts ->
             adapter.submitList(posts)
         }
     }
-
-    private fun setupClickListeners(binding: PostCardBinding, post: Post) {
-        with(binding) {
-            like.setOnClickListener {
-                viewModel.likeById(post.id)
-            }
-            shear.setOnClickListener {
-                viewModel.shareById(post.id)
-            }
-        }
-    }
-
 }
+
