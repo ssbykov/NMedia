@@ -7,4 +7,7 @@
     <string name="description_views_icon" translatable="false">Views icon</string>
     <string name="description_likes_icon" translatable="false">Likes icon</string>
     <string name="menu_remove">Remove</string>
+    <string name="save_icon" translatable="false">Save icon</string>
+    <string name="post_text">Post text</string>
+    <string name="error_empty_content">Content can\'t be empty</string>
 </resources>
