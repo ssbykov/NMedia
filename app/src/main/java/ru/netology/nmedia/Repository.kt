@@ -8,6 +8,7 @@ interface PostRepository {
     fun getAll(): LiveData<List<Post>>
     fun likeById(id: Long)
     fun shareById(id: Long)
+    fun removeById(id: Long)
 }
 
 class PostRepositoryInMemoryImpl : PostRepository {
@@ -81,6 +82,7 @@ class PostRepositoryInMemoryImpl : PostRepository {
     private val data = MutableLiveData(posts)
     override fun getAll(): LiveData<List<Post>> = data
 
+    //метод выставления лайка посту
     override fun likeById(id: Long) {
         posts = posts.map { post ->
             if (post.id == id) {
@@ -92,9 +94,18 @@ class PostRepositoryInMemoryImpl : PostRepository {
         data.value = posts
     }
 
+    //метод поделиться постом
     override fun shareById(id: Long) {
         posts = posts.map { post ->
             if (post.id == id) post.copy(shares = post.shares + 1) else post
+        }
+        data.value = posts
+    }
+
+    //метод удаления поста
+    override fun removeById(id: Long) {
+        posts = posts.filter { post ->
+            post.id != id
         }
         data.value = posts
     }

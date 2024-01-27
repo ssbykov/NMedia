@@ -6,4 +6,5 @@
     <string name="description_shears_icon" translatable="false">Shears icon</string>
     <string name="description_views_icon" translatable="false">Views icon</string>
     <string name="description_likes_icon" translatable="false">Likes icon</string>
+    <string name="menu_remove">Remove</string>
 </resources>

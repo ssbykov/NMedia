@@ -2,6 +2,7 @@ package ru.netology.nmedia.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -13,6 +14,7 @@ import ru.netology.nmedia.utils.formatCount
 interface SetupClickListeners {
     fun onLikeListener(post: Post)
     fun onShareListener(post: Post)
+    fun onRemoveListener(post: Post)
 }
 
 class PostsAdapter(private val setupClickListeners: SetupClickListeners) :
@@ -57,6 +59,21 @@ class PostViewHolder(
             }
             shear.setOnClickListener {
                 setupClickListeners.onShareListener(post)
+            }
+            menu.setOnClickListener {
+                PopupMenu(it.context, it).apply {
+                    inflate(R.menu.options_post)
+                    setOnMenuItemClickListener { item ->
+                        when (item.itemId) {
+                            R.id.remove -> {
+                                setupClickListeners.onRemoveListener(post)
+                                true
+                            }
+
+                            else -> false
+                        }
+                    }
+                }.show()
             }
         }
 

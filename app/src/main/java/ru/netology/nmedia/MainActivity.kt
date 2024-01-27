@@ -20,8 +20,13 @@ class MainActivity : AppCompatActivity() {
             override fun onLikeListener(post: Post) {
                 viewModel.likeById(post.id)
             }
+
             override fun onShareListener(post: Post) {
                 viewModel.shareById(post.id)
+            }
+
+            override fun onRemoveListener(post: Post) {
+                viewModel.removeById(post.id)
             }
         })
         binding.root.adapter = adapter
