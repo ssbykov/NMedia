@@ -30,8 +30,10 @@ class MainActivity : AppCompatActivity() {
 
             override fun onRemoveListener(post: Post) {
                 viewModel.removeById(post.id)
-                viewModel.clear()
-                clearEdit(binding)
+                if (viewModel.edited.value?.id == post.id) {
+                    viewModel.clear()
+                    clearEdit(binding)
+                }
             }
 
             override fun onEditListener(post: Post) {
