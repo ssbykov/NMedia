@@ -1,6 +1,7 @@
 package ru.netology.nmedia
 
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +34,8 @@ class MainActivity : AppCompatActivity() {
 
             override fun onEditListener(post: Post) {
                 viewModel.edit(post)
+                binding.shortContent.text = post.content
+                binding.group.visibility = View.VISIBLE
             }
         })
         binding.list.adapter = adapter
@@ -58,11 +61,23 @@ class MainActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             viewModel.changeContentAndSave(text)
-            with(binding.content) {
-                setText("")
-                clearFocus()
-            }
-            AndroidUtils.hideKeyboard(it)
+            clearEdit(binding)
+        }
+
+        binding.close.setOnClickListener {
+            viewModel.clear()
+            clearEdit(binding)
+        }
+
+    }
+
+    private fun clearEdit(binding: ActivityMainBinding) {
+        with(binding) {
+            group.visibility = View.GONE
+            shortContent.text = ""
+            content.setText("")
+            content.clearFocus()
+            AndroidUtils.hideKeyboard(content)
         }
     }
 }

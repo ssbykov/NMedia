@@ -12,9 +12,71 @@
         android:layout_height="0dp"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toBottomOf="@id/editTop"
+        app:layout_constraintBottom_toBottomOf="@id/titleTop"
         app:layout_constraintTop_toTopOf="parent"
         tools:listitem="@layout/post_card" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/titleTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="top"
+        app:constraint_referenced_ids="editMessage, close, edit" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="edit, editMessage, shortContent, close" />
+
+
+    <ImageView
+        android:id="@+id/edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/edit_icon"
+        app:layout_constraintBottom_toTopOf="@id/editTop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_edit_24" />
+
+    <TextView
+        android:id="@+id/editMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:padding="4dp"
+        android:singleLine="true"
+        android:text="@string/edit_message"
+        android:textColor="@android:color/holo_blue_light"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@id/shortContent"
+        app:layout_constraintEnd_toStartOf="@id/close"
+        app:layout_constraintStart_toEndOf="@id/edit" />
+
+    <TextView
+        android:id="@+id/shortContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:padding="4dp"
+        android:paddingBottom="6dp"
+        android:singleLine="true"
+        app:layout_constraintBottom_toTopOf="@id/content"
+        app:layout_constraintEnd_toStartOf="@id/close"
+        app:layout_constraintStart_toEndOf="@id/edit"
+        tools:text="@string/short_content" />
+
+    <ImageButton
+        android:id="@+id/close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:contentDescription="@string/close_icon"
+        app:layout_constraintBottom_toTopOf="@id/editTop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:srcCompat="@drawable/ic_close_24" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/editTop"

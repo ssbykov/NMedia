@@ -9,6 +9,10 @@
     <string name="menu_remove">Remove</string>
     <string name="menu_edit">Edit</string>
     <string name="save_icon" translatable="false">Save icon</string>
+    <string name="close_icon" translatable="false">Close icon</string>
+    <string name="edit_icon" translatable="false">Edit icon</string>
     <string name="post_text">Post text</string>
     <string name="error_empty_content">Content can\'t be empty</string>
+    <string name="short_content">Post short content…</string>
+    <string name="edit_message">Edit message</string>
 </resources>

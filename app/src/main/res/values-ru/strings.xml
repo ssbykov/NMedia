@@ -6,4 +6,6 @@
     <string name="menu_edit">Изменить</string>
     <string name="post_text">Текст поста</string>
     <string name="error_empty_content">Контент не может быть пустым</string>
+    <string name="short_content">Краткий контент поста…</string>
+    <string name="edit_message">Редактирование сообщения</string>
 </resources>
