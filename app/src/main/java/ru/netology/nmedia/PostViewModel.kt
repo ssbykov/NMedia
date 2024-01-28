@@ -22,8 +22,8 @@ class PostViewModel : ViewModel() {
     fun likeById(id: Long) = repository.likeById(id)
     fun shareById(id: Long) = repository.shareById(id)
     fun removeById(id: Long) = repository.removeById(id)
-    fun edit(post: Post): () -> Unit = { edited.value = post }
-    fun clear(): () -> Unit = { edited.value = empty }
+    fun edit(post: Post) { edited.value = post }
+    fun clear() { edited.value = empty }
 
     fun changeContentAndSave(content: String) {
         edited.value?.let {
