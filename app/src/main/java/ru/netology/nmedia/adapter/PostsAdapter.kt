@@ -15,6 +15,7 @@ interface SetupClickListeners {
     fun onLikeListener(post: Post)
     fun onShareListener(post: Post)
     fun onRemoveListener(post: Post)
+    fun onEditListener(post: Post)
 }
 
 class PostsAdapter(private val setupClickListeners: SetupClickListeners) :
@@ -69,7 +70,10 @@ class PostViewHolder(
                                 setupClickListeners.onRemoveListener(post)
                                 true
                             }
-
+                            R.id.edit -> {
+                                setupClickListeners.onEditListener(post)
+                                true
+                            }
                             else -> false
                         }
                     }

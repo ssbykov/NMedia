@@ -119,17 +119,19 @@ class PostRepositoryInMemoryImpl : PostRepository {
     //метод сохранения поста
     @SuppressLint("SimpleDateFormat")
     override fun save(post: Post) {
-        posts = listOf(
-            post.copy(
-                id = nextId++,
-                author = "Автор",
-                likedByMe = false,
-                published = SimpleDateFormat("dd MMMM yyyy в H:mm", Locale("ru"))
-                    .format(Date())
-            )
-        ) + posts
+        posts = if (post.id == 0L) {
+            listOf(
+                post.copy(
+                    id = nextId++,
+                    author = "Автор",
+                    likedByMe = false,
+                    published = SimpleDateFormat("dd MMMM в H:mm", Locale("ru"))
+                        .format(Date())
+                )
+            ) + posts
+        } else {
+            posts.map { if (it.id == post.id) post.copy(content = post.content) else it }
+        }
         data.value = posts
     }
-
-
 }
