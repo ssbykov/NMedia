@@ -3,9 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:paddingTop="4dp"
     android:paddingBottom="4dp"
-    android:layout_height="wrap_content"
     tools:context=".MainActivity">
 
     <ImageView
@@ -69,70 +69,44 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/common_spacing"
-        android:padding="4dp"
         android:autoLink="web"
+        android:padding="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/barrier"
         tools:text="@sample/posts.json/data/content" />
 
-    <ImageButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/shear"
+        style="@style/Widget.AppCompat.Buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/common_margin"
-        android:background="@android:color/transparent"
         android:contentDescription="@string/description_shears_icon"
-        app:layout_constraintStart_toEndOf="@+id/likeCount"
-        app:layout_constraintTop_toBottomOf="@+id/content"
-        app:srcCompat="@drawable/ic_share_24" />
-
-    <ImageButton
-        android:id="@+id/views"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/common_margin"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/description_views_icon"
-        app:layout_constraintEnd_toStartOf="@+id/viewsCount"
-        app:layout_constraintTop_toBottomOf="@+id/content"
-        app:srcCompat="@drawable/ic_views_24" />
-
-    <ImageButton
-        android:id="@+id/like"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/common_margin"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/description_likes_icon"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/content"
-        app:srcCompat="@drawable/ic_like_24" />
-
-    <TextView
-        android:id="@+id/likeCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/common_margin"
+        app:icon="@drawable/ic_share_24"
         app:layout_constraintStart_toEndOf="@+id/like"
+        app:layout_constraintTop_toBottomOf="@+id/content"
+        tools:text="15" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/views"
+        style="@style/Widget.AppCompat.Buttons"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/description_views_icon"
+        app:icon="@drawable/ic_views_24"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/content"
         tools:text="10" />
 
-    <TextView
-        android:id="@+id/shareCount"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/like"
+        style="@style/Widget.AppCompat.Buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="@dimen/common_margin"
-        app:layout_constraintStart_toEndOf="@+id/shear"
-        app:layout_constraintTop_toBottomOf="@+id/content"
-        tools:text="5" />
-
-    <TextView
-        android:id="@+id/viewsCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/common_margin"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:checkable="true"
+        android:contentDescription="@string/description_likes_icon"
+        app:icon="@drawable/ic_like_24dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/content"
         tools:text="5" />
 
