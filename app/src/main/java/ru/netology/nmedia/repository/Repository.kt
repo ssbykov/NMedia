@@ -1,4 +1,4 @@
-package ru.netology.nmedia
+package ru.netology.nmedia.repository
 
 import android.annotation.SuppressLint
 import androidx.lifecycle.LiveData
