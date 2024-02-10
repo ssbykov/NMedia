@@ -1,5 +1,6 @@
 package ru.netology.nmedia
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -25,6 +26,14 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onShareListener(post: Post) {
+                val intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, post.content)
+                }
+
+                val shareIntent = Intent.createChooser(intent, getString(R.string.chooser_sharing_post))
+                startActivity(shareIntent)
                 viewModel.shareById(post.id)
             }
 

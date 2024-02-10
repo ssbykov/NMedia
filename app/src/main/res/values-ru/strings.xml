@@ -8,4 +8,5 @@
     <string name="error_empty_content">Контент не может быть пустым</string>
     <string name="short_content">Краткий контент поста…</string>
     <string name="edit_message">Редактирование сообщения</string>
+    <string name="chooser_sharing_post">Передаваемый текст</string>
 </resources>
