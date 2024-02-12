@@ -28,8 +28,8 @@ class NewPostActivity : AppCompatActivity() {
     }
 }
 
-object NewPostContract : ActivityResultContract<String, String?>() {
-    override fun createIntent(context: Context, input: String): Intent {
+object NewPostContract : ActivityResultContract<String?, String?>() {
+    override fun createIntent(context: Context, input: String?): Intent {
         val intent = Intent(context, NewPostActivity::class.java)
         intent.putExtra(Intent.EXTRA_TEXT, input)
         return intent

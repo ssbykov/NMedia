@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.add.setOnClickListener {
-            newPostLauncher.launch("")
+            newPostLauncher.launch(null)
         }
     }
 }

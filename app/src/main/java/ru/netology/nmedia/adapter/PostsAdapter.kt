@@ -1,8 +1,12 @@
 package ru.netology.nmedia.adapter
 
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -58,6 +62,20 @@ class PostViewHolder(
             }
             shear.setOnClickListener {
                 setupClickListeners.onShareListener(post)
+            }
+            if (post.video != null) {
+                play.setOnClickListener {
+                    val intent = Intent().apply {
+                        action = Intent.ACTION_VIEW
+                        data = Uri.parse(post.video)
+                    }
+                    startActivity(play.context, intent, null)
+                }
+                preview.visibility = View.VISIBLE
+                play.visibility = View.VISIBLE
+            } else {
+                preview.visibility = View.GONE
+                play.visibility = View.GONE
             }
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {

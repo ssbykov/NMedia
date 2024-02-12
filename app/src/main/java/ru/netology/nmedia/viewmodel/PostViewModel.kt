@@ -30,8 +30,8 @@ class PostViewModel : ViewModel() {
         edited.value?.let {
             if (it.content != content) {
                 repository.save(it.copy(content = content))
-                edited.value = empty
             }
+            edited.value = empty
         }
     }
 }
