@@ -28,6 +28,7 @@ class PostRepositorySharedPrefsInmpl(
     private var posts = emptyList<Post>()
         private set(value) {
             field = value
+            data.value = posts
             sync()
         }
 
@@ -51,7 +52,6 @@ class PostRepositorySharedPrefsInmpl(
                 post.copy(likedByMe = !post.likedByMe, likes = likes)
             } else post
         }
-        data.value = posts
     }
 
     //метод поделиться постом
@@ -59,7 +59,6 @@ class PostRepositorySharedPrefsInmpl(
         posts = posts.map { post ->
             if (post.id == id) post.copy(shares = post.shares + 1) else post
         }
-        data.value = posts
     }
 
     //метод удаления поста
@@ -67,7 +66,6 @@ class PostRepositorySharedPrefsInmpl(
         posts = posts.filter { post ->
             post.id != id
         }
-        data.value = posts
     }
 
     //метод сохранения поста
@@ -86,7 +84,6 @@ class PostRepositorySharedPrefsInmpl(
         } else {
             posts.map { if (it.id == post.id) post.copy(content = post.content) else it }
         }
-        data.value = posts
     }
 
     private fun sync() {
