@@ -15,4 +15,7 @@
     <string name="error_empty_content">Content can\'t be empty</string>
     <string name="short_content">Post short content…</string>
     <string name="edit_message">Edit message</string>
+    <string name="chooser_sharing_post">Sharing text</string>
+    <string name="play_video">Play video</string>
+    <string name="video_preview">Video preview</string>
 </resources>

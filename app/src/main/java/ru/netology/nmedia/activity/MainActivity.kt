@@ -1,15 +1,16 @@
-package ru.netology.nmedia
+package ru.netology.nmedia.activity
 
+import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.adapter.SetupClickListeners
 import ru.netology.nmedia.databinding.ActivityMainBinding
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.utils.AndroidUtils
+import ru.netology.nmedia.viewmodel.PostViewModel
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,12 +20,31 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        val newPostLauncher = registerForActivityResult(NewPostContract) { result ->
+            if (result.isNullOrBlank()) {
+                Toast.makeText(this, R.string.error_empty_content, Toast.LENGTH_LONG).show()
+            } else viewModel.changeContentAndSave(result)
+        }
+
+        val intent = Intent().apply {
+            action = Intent.ACTION_VIEW
+        }
+
         val adapter = PostsAdapter(object : SetupClickListeners {
             override fun onLikeListener(post: Post) {
                 viewModel.likeById(post.id)
             }
 
             override fun onShareListener(post: Post) {
+                val shareIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, post.content)
+                }
+
+                val shareChooser =
+                    Intent.createChooser(shareIntent, getString(R.string.chooser_sharing_post))
+                startActivity(shareChooser)
                 viewModel.shareById(post.id)
             }
 
@@ -32,16 +52,13 @@ class MainActivity : AppCompatActivity() {
                 viewModel.removeById(post.id)
                 if (viewModel.edited.value?.id == post.id) {
                     viewModel.clear()
-                    clearEdit(binding)
                 }
             }
 
             override fun onEditListener(post: Post) {
                 viewModel.edit(post)
-                binding.shortContent.text = post.content
-                binding.group.visibility = View.VISIBLE
             }
-        })
+        }, intent)
         binding.list.adapter = adapter
         viewModel.data.observe(this) { posts ->
             val newPost = adapter.currentList.size < posts.size && adapter.currentList.size > 0
@@ -51,37 +68,11 @@ class MainActivity : AppCompatActivity() {
         }
         viewModel.edited.observe(this) { post ->
             if (post.id != 0L) {
-                with(binding.content) {
-                    requestFocus()
-                    setText(post.content)
-                }
-                AndroidUtils.showKeyboard(binding.content)
+                newPostLauncher.launch(post.content)
             }
         }
-        binding.save.setOnClickListener {
-            val text = binding.content.text.toString().trim()
-            if (text.isEmpty()) {
-                Toast.makeText(this, R.string.error_empty_content, Toast.LENGTH_LONG).show()
-                return@setOnClickListener
-            }
-            viewModel.changeContentAndSave(text)
-            clearEdit(binding)
-        }
-
-        binding.close.setOnClickListener {
-            viewModel.clear()
-            clearEdit(binding)
-        }
-
-    }
-
-    private fun clearEdit(binding: ActivityMainBinding) {
-        with(binding) {
-            group.visibility = View.GONE
-            shortContent.text = ""
-            content.setText("")
-            content.clearFocus()
-            AndroidUtils.hideKeyboard(content)
+        binding.add.setOnClickListener {
+            newPostLauncher.launch(null)
         }
     }
 }

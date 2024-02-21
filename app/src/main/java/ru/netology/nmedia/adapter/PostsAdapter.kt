@@ -1,8 +1,12 @@
 package ru.netology.nmedia.adapter
 
+import android.content.Intent
+import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -18,12 +22,15 @@ interface SetupClickListeners {
     fun onEditListener(post: Post)
 }
 
-class PostsAdapter(private val setupClickListeners: SetupClickListeners) :
+class PostsAdapter(
+    private val setupClickListeners: SetupClickListeners,
+    private val intent: Intent
+) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = PostCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(binding, setupClickListeners)
+        return PostViewHolder(binding, setupClickListeners, intent)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -42,6 +49,7 @@ object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
 class PostViewHolder(
     private val binding: PostCardBinding,
     private val setupClickListeners: SetupClickListeners,
+    private val intent: Intent
 ) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
@@ -59,6 +67,17 @@ class PostViewHolder(
             shear.setOnClickListener {
                 setupClickListeners.onShareListener(post)
             }
+            if (post.video != null) {
+                play.setOnClickListener {
+                    intent.data = Uri.parse(post.video)
+                    startActivity(play.context, intent, null)
+                }
+                preview.visibility = View.VISIBLE
+                play.visibility = View.VISIBLE
+            } else {
+                preview.visibility = View.GONE
+                play.visibility = View.GONE
+            }
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)
@@ -68,10 +87,12 @@ class PostViewHolder(
                                 setupClickListeners.onRemoveListener(post)
                                 true
                             }
+
                             R.id.edit -> {
                                 setupClickListeners.onEditListener(post)
                                 true
                             }
+
                             else -> false
                         }
                     }
