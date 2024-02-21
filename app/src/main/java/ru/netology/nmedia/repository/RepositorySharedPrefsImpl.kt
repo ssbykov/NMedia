@@ -36,7 +36,6 @@ class PostRepositorySharedPrefsInmpl(
     init {
         prefs.getString(key, null)?.let {
             posts = gson.fromJson(it, type)
-            data.value = posts
             nextId = posts.maxOfOrNull { post -> post.id }?.inc() ?: 1
         }
     }
