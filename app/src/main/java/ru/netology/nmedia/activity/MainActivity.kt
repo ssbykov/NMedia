@@ -26,21 +26,25 @@ class MainActivity : AppCompatActivity() {
             } else viewModel.changeContentAndSave(result)
         }
 
+        val intent = Intent().apply {
+            action = Intent.ACTION_VIEW
+        }
+
         val adapter = PostsAdapter(object : SetupClickListeners {
             override fun onLikeListener(post: Post) {
                 viewModel.likeById(post.id)
             }
 
             override fun onShareListener(post: Post) {
-                val intent = Intent().apply {
+                val shareIntent = Intent().apply {
                     action = Intent.ACTION_SEND
                     type = "text/plain"
                     putExtra(Intent.EXTRA_TEXT, post.content)
                 }
 
-                val shareIntent =
-                    Intent.createChooser(intent, getString(R.string.chooser_sharing_post))
-                startActivity(shareIntent)
+                val shareChooser =
+                    Intent.createChooser(shareIntent, getString(R.string.chooser_sharing_post))
+                startActivity(shareChooser)
                 viewModel.shareById(post.id)
             }
 
@@ -54,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             override fun onEditListener(post: Post) {
                 viewModel.edit(post)
             }
-        })
+        }, intent)
         binding.list.adapter = adapter
         viewModel.data.observe(this) { posts ->
             val newPost = adapter.currentList.size < posts.size && adapter.currentList.size > 0

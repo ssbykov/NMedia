@@ -22,12 +22,15 @@ interface SetupClickListeners {
     fun onEditListener(post: Post)
 }
 
-class PostsAdapter(private val setupClickListeners: SetupClickListeners) :
+class PostsAdapter(
+    private val setupClickListeners: SetupClickListeners,
+    private val intent: Intent
+) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = PostCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(binding, setupClickListeners)
+        return PostViewHolder(binding, setupClickListeners, intent)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -46,6 +49,7 @@ object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
 class PostViewHolder(
     private val binding: PostCardBinding,
     private val setupClickListeners: SetupClickListeners,
+    private val intent: Intent
 ) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
@@ -65,10 +69,7 @@ class PostViewHolder(
             }
             if (post.video != null) {
                 play.setOnClickListener {
-                    val intent = Intent().apply {
-                        action = Intent.ACTION_VIEW
-                        data = Uri.parse(post.video)
-                    }
+                    intent.data = Uri.parse(post.video)
                     startActivity(play.context, intent, null)
                 }
                 preview.visibility = View.VISIBLE
@@ -86,10 +87,12 @@ class PostViewHolder(
                                 setupClickListeners.onRemoveListener(post)
                                 true
                             }
+
                             R.id.edit -> {
                                 setupClickListeners.onEditListener(post)
                                 true
                             }
+
                             else -> false
                         }
                     }
