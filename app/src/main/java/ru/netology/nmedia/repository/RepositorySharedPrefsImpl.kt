@@ -12,7 +12,7 @@ import java.util.Date
 import java.util.Locale
 
 
-class PostRepositorySharedPrefsInmpl(
+class PostRepositorySharedPrefsImpl(
     context: Context
 ) : PostRepository {
     private val gson = Gson()

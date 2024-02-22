@@ -1,6 +1,7 @@
 package ru.netology.nmedia.activity
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -25,11 +26,6 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, R.string.error_empty_content, Toast.LENGTH_LONG).show()
             } else viewModel.changeContentAndSave(result)
         }
-
-        val intent = Intent().apply {
-            action = Intent.ACTION_VIEW
-        }
-
         val adapter = PostsAdapter(object : SetupClickListeners {
             override fun onLikeListener(post: Post) {
                 viewModel.likeById(post.id)
@@ -58,7 +54,16 @@ class MainActivity : AppCompatActivity() {
             override fun onEditListener(post: Post) {
                 viewModel.edit(post)
             }
-        }, intent)
+
+            override fun onPlayListener(post: Post) {
+                intent = Intent().apply {
+                    action = Intent.ACTION_VIEW
+                    data = Uri.parse(post.video)
+                }
+                startActivity(intent, null)
+            }
+        }
+        )
         binding.list.adapter = adapter
         viewModel.data.observe(this) { posts ->
             val newPost = adapter.currentList.size < posts.size && adapter.currentList.size > 0
