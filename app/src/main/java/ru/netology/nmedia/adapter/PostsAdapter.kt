@@ -1,12 +1,9 @@
 package ru.netology.nmedia.adapter
 
-import android.content.Intent
-import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -20,17 +17,17 @@ interface SetupClickListeners {
     fun onShareListener(post: Post)
     fun onRemoveListener(post: Post)
     fun onEditListener(post: Post)
+    fun onPlayListener(post: Post)
 }
 
 class PostsAdapter(
     private val setupClickListeners: SetupClickListeners,
-    private val intent: Intent
 ) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val binding = PostCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-        return PostViewHolder(binding, setupClickListeners, intent)
+        return PostViewHolder(binding, setupClickListeners)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
@@ -49,7 +46,6 @@ object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
 class PostViewHolder(
     private val binding: PostCardBinding,
     private val setupClickListeners: SetupClickListeners,
-    private val intent: Intent
 ) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
@@ -69,8 +65,7 @@ class PostViewHolder(
             }
             if (post.video != null) {
                 play.setOnClickListener {
-                    intent.data = Uri.parse(post.video)
-                    startActivity(play.context, intent, null)
+                    setupClickListeners.onPlayListener(post)
                 }
                 preview.visibility = View.VISIBLE
                 play.visibility = View.VISIBLE
