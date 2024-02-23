@@ -9,28 +9,31 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.adapter.SetupClickListeners
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class FeedFragment : Fragment() {
 
-    private val viewModel: PostViewModel by viewModels()
+    private val viewModel: PostViewModel by viewModels(
+        ownerProducer = :: requireParentFragment
+    )
+
+    companion object {
+        var Bundle.textArg: String? by StringArg
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = FragmentFeedBinding.inflate(inflater, container, false)
-        val newPostLauncher = registerForActivityResult(NewPostContract) { result ->
-            if (result.isNullOrBlank()) {
-                Toast.makeText(context, R.string.error_empty_content, Toast.LENGTH_LONG).show()
-            } else viewModel.changeContentAndSave(result)
-        }
 
         val adapter = PostsAdapter(object : SetupClickListeners {
             override fun onLikeListener(post: Post) {
@@ -79,11 +82,18 @@ class FeedFragment : Fragment() {
         }
         viewModel.edited.observe(viewLifecycleOwner) { post ->
             if (post.id != 0L) {
-                newPostLauncher.launch(post.content)
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_newPostFragment,
+                    Bundle().apply {
+                        textArg = post.content
+                    }
+                )
+//                newPostLauncher.launch(post.content)
             }
         }
         binding.add.setOnClickListener {
-            newPostLauncher.launch(null)
+            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+//            newPostLauncher.launch(null)
         }
         return binding.root
     }

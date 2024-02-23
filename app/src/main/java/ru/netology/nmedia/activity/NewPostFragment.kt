@@ -9,29 +9,33 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
+import ru.netology.nmedia.utils.AndroidUtils
+import ru.netology.nmedia.viewmodel.PostViewModel
 
 class NewPostFragment : Fragment() {
 
+
+    private val viewModel: PostViewModel by viewModels(
+        ownerProducer = ::requireParentFragment
+    )
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         val binding = FragmentNewPostBinding.inflate(inflater, container, false)
         with(binding) {
             content.requestFocus()
+            arguments?.textArg?.let ( binding.content::setText )
             val intent = Intent()
-            content.setText(intent.getStringExtra(Intent.EXTRA_TEXT))
+            intent.removeExtra(Intent.EXTRA_TEXT)
             ok.setOnClickListener {
-                val text = content.text.toString()
-                if (content.text.isNotBlank()) {
-                    activity?.setResult(
-                        Activity.RESULT_OK,
-                        Intent().putExtra(Intent.EXTRA_TEXT, text)
-                    )
-                } else activity?.setResult(Activity.RESULT_CANCELED)
+                viewModel.changeContentAndSave(binding.content.text.toString())
+                AndroidUtils.hideKeyboard(requireView())
                 findNavController().navigateUp()
             }
         }
@@ -40,14 +44,3 @@ class NewPostFragment : Fragment() {
 
 }
 
-object NewPostContract : ActivityResultContract<String?, String?>() {
-    override fun createIntent(context: Context, input: String?): Intent {
-        val intent = Intent(context, NewPostFragment::class.java)
-        intent.putExtra(Intent.EXTRA_TEXT, input)
-        return intent
-    }
-
-    override fun parseResult(resultCode: Int, intent: Intent?) =
-        intent?.getStringExtra(Intent.EXTRA_TEXT)
-
-}
