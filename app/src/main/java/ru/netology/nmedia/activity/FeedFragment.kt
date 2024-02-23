@@ -3,29 +3,35 @@ package ru.netology.nmedia.activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.adapter.SetupClickListeners
-import ru.netology.nmedia.databinding.ActivityMainBinding
+import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.viewmodel.PostViewModel
 
-class MainActivity : AppCompatActivity() {
+class FeedFragment : Fragment() {
 
     private val viewModel: PostViewModel by viewModels()
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        val binding = FragmentFeedBinding.inflate(inflater, container, false)
         val newPostLauncher = registerForActivityResult(NewPostContract) { result ->
             if (result.isNullOrBlank()) {
-                Toast.makeText(this, R.string.error_empty_content, Toast.LENGTH_LONG).show()
+                Toast.makeText(context, R.string.error_empty_content, Toast.LENGTH_LONG).show()
             } else viewModel.changeContentAndSave(result)
         }
+
         val adapter = PostsAdapter(object : SetupClickListeners {
             override fun onLikeListener(post: Post) {
                 viewModel.likeById(post.id)
@@ -56,7 +62,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onPlayListener(post: Post) {
-                intent = Intent().apply {
+                val intent = Intent().apply {
                     action = Intent.ACTION_VIEW
                     data = Uri.parse(post.video)
                 }
@@ -65,13 +71,13 @@ class MainActivity : AppCompatActivity() {
         }
         )
         binding.list.adapter = adapter
-        viewModel.data.observe(this) { posts ->
+        viewModel.data.observe(viewLifecycleOwner) { posts ->
             val newPost = adapter.currentList.size < posts.size && adapter.currentList.size > 0
             adapter.submitList(posts) {
                 if (newPost) binding.list.smoothScrollToPosition(0)
             }
         }
-        viewModel.edited.observe(this) { post ->
+        viewModel.edited.observe(viewLifecycleOwner) { post ->
             if (post.id != 0L) {
                 newPostLauncher.launch(post.content)
             }
@@ -79,6 +85,8 @@ class MainActivity : AppCompatActivity() {
         binding.add.setOnClickListener {
             newPostLauncher.launch(null)
         }
+        return binding.root
     }
+
 }
 
