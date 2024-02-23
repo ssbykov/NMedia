@@ -26,10 +26,11 @@ class NewPostFragment : Fragment() {
     ): View {
         val binding = FragmentNewPostBinding.inflate(inflater, container, false)
         with(binding) {
-            content.requestFocus()
             arguments?.textArg?.let ( binding.content::setText )
             val intent = Intent()
-            intent.removeExtra(Intent.EXTRA_TEXT)
+//            content.setText(intent.getStringExtra(Intent.EXTRA_TEXT))
+            content.requestFocus()
+            AndroidUtils.showKeyboard(content)
             ok.setOnClickListener {
                 viewModel.changeContentAndSave(binding.content.text.toString())
                 AndroidUtils.hideKeyboard(requireView())
@@ -39,5 +40,10 @@ class NewPostFragment : Fragment() {
         return binding.root
     }
 
+    override fun onPause() {
+        super.onPause()
+//        arguments?.textArg = ""
+        viewModel.clear()
+    }
 }
 
