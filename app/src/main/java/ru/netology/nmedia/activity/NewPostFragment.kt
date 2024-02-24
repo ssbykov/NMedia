@@ -1,6 +1,5 @@
 package ru.netology.nmedia.activity
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -19,6 +18,7 @@ class NewPostFragment : Fragment() {
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
     )
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -26,9 +26,7 @@ class NewPostFragment : Fragment() {
     ): View {
         val binding = FragmentNewPostBinding.inflate(inflater, container, false)
         with(binding) {
-            arguments?.textArg?.let ( binding.content::setText )
-            val intent = Intent()
-//            content.setText(intent.getStringExtra(Intent.EXTRA_TEXT))
+            arguments?.textArg?.let(binding.content::setText)
             content.requestFocus()
             AndroidUtils.showKeyboard(content)
             ok.setOnClickListener {
@@ -42,7 +40,6 @@ class NewPostFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-//        arguments?.textArg = ""
         viewModel.clear()
     }
 }

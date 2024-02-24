@@ -19,6 +19,8 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 
 class FeedFragment : Fragment() {
 
+    lateinit var binding: FragmentFeedBinding
+
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = :: requireParentFragment
     )
@@ -32,8 +34,13 @@ class FeedFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding = FragmentFeedBinding.inflate(inflater, container, false)
+        binding = FragmentFeedBinding.inflate(inflater, container, false)
 
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         val adapter = PostsAdapter(object : SetupClickListeners {
             override fun onLikeListener(post: Post) {
                 viewModel.likeById(post.id)
@@ -87,15 +94,12 @@ class FeedFragment : Fragment() {
                         textArg = post.content
                     }
                 )
-//                newPostLauncher.launch(post.content)
             }
         }
         binding.add.setOnClickListener {
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
-//            newPostLauncher.launch(null)
         }
-        return binding.root
-    }
 
+    }
 }
 
