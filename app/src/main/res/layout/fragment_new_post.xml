@@ -4,23 +4,23 @@
     android:layout_height="match_parent">
 
     <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="100dp">
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:fillViewport="true"
+        android:fadeScrollbars="false"
+        android:scrollbars="vertical">
 
+        <EditText
+            android:id="@+id/content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:gravity="top"
+            android:hint="@string/post_text"
+            android:importantForAutofill="no"
+            android:inputType="textMultiLine"
+            android:padding="8dp" />
     </androidx.core.widget.NestedScrollView>
-
-    <EditText
-        android:id="@+id/content"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:gravity="top"
-        android:hint="@string/post_text"
-        android:importantForAutofill="no"
-        android:inputType="textMultiLine"
-        android:padding="8dp" />
 
     <com.google.android.material.bottomappbar.BottomAppBar
         android:id="@+id/bottomAppBar"
@@ -33,8 +33,8 @@
         android:id="@+id/ok"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:contentDescription="@string/edit_message"
         app:layout_anchor="@id/bottomAppBar"
-        app:srcCompat="@drawable/ic_add_24dp"
-        android:contentDescription="@string/edit_message" />
+        app:srcCompat="@drawable/ic_save_48" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -7,9 +7,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.utils.AndroidUtils
+import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
 
 class NewPostFragment : Fragment() {
@@ -19,6 +21,10 @@ class NewPostFragment : Fragment() {
         ownerProducer = ::requireParentFragment
     )
 
+    companion object {
+        var Bundle.textPostID: String? by StringArg
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -26,13 +32,19 @@ class NewPostFragment : Fragment() {
     ): View {
         val binding = FragmentNewPostBinding.inflate(inflater, container, false)
         with(binding) {
-            arguments?.textArg?.let(binding.content::setText)
+            binding.content.setText(arguments?.textArg)
             content.requestFocus()
             AndroidUtils.showKeyboard(content)
             ok.setOnClickListener {
-                viewModel.changeContentAndSave(binding.content.text.toString())
+                val postId = viewModel.changeContentAndSave(binding.content.text.toString())
                 AndroidUtils.hideKeyboard(requireView())
-                findNavController().navigateUp()
+                findNavController().navigate(
+                    R.id.action_newPostFragment_to_feedFragment,
+                    Bundle().apply {
+                        textPostID = postId
+                    }
+                )
+
             }
         }
         return binding.root

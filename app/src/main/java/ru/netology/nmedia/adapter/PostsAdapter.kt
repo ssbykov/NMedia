@@ -12,16 +12,9 @@ import ru.netology.nmedia.databinding.PostCardBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.utils.formatCount
 
-interface SetupClickListeners {
-    fun onLikeListener(post: Post)
-    fun onShareListener(post: Post)
-    fun onRemoveListener(post: Post)
-    fun onEditListener(post: Post)
-    fun onPlayListener(post: Post)
-}
 
 class PostsAdapter(
-    private val setupClickListeners: SetupClickListeners,
+    private val setupClickListeners: PostsSetupClickListeners,
 ) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
 
@@ -45,7 +38,7 @@ object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
 
 class PostViewHolder(
     private val binding: PostCardBinding,
-    private val setupClickListeners: SetupClickListeners,
+    private val setupClickListeners: PostsSetupClickListeners,
 ) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
@@ -73,6 +66,10 @@ class PostViewHolder(
                 preview.visibility = View.GONE
                 play.visibility = View.GONE
             }
+            content.setOnClickListener {
+                setupClickListeners.onPostListener(post)
+            }
+            // инициализация меню
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)

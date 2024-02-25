@@ -10,8 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.NewPostFragment.Companion.textPostID
 import ru.netology.nmedia.adapter.PostsAdapter
-import ru.netology.nmedia.adapter.SetupClickListeners
+import ru.netology.nmedia.adapter.PostsSetupClickListeners
 import ru.netology.nmedia.databinding.FragmentFeedBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.utils.StringArg
@@ -19,14 +20,15 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 
 class FeedFragment : Fragment() {
 
-    lateinit var binding: FragmentFeedBinding
+    private lateinit var binding: FragmentFeedBinding
 
     private val viewModel: PostViewModel by viewModels(
-        ownerProducer = :: requireParentFragment
+        ownerProducer = ::requireParentFragment
     )
 
     companion object {
         var Bundle.textArg: String? by StringArg
+        var Bundle.textPostID: String? by StringArg
     }
 
     override fun onCreateView(
@@ -41,7 +43,7 @@ class FeedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val adapter = PostsAdapter(object : SetupClickListeners {
+        val adapter = PostsAdapter(object : PostsSetupClickListeners {
             override fun onLikeListener(post: Post) {
                 viewModel.likeById(post.id)
             }
@@ -77,13 +79,29 @@ class FeedFragment : Fragment() {
                 }
                 startActivity(intent, null)
             }
+
+            override fun onPostListener(post: Post) {
+                findNavController().navigate(
+                    R.id.action_feedFragment_to_postFragment,
+                    Bundle().apply {
+                        textPostID = post.id.toString()
+                    }
+                )
+            }
         }
         )
         binding.list.adapter = adapter
         viewModel.data.observe(viewLifecycleOwner) { posts ->
-            val newPost = adapter.currentList.size < posts.size && adapter.currentList.size > 0
-            adapter.submitList(posts) {
-                if (newPost) binding.list.smoothScrollToPosition(0)
+            adapter.submitList(posts)
+            if (arguments?.textPostID != null) {
+                binding.list.scrollToPosition(
+                    posts.indexOfFirst {
+                        it.id == arguments?.textPostID?.toLong()
+                    }
+                )
+                Bundle().apply {
+                    textPostID = null
+                }
             }
         }
         viewModel.edited.observe(viewLifecycleOwner) { post ->
