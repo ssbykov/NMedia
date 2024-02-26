@@ -32,7 +32,7 @@ class NewPostFragment : Fragment() {
     ): View {
         val binding = FragmentNewPostBinding.inflate(inflater, container, false)
         with(binding) {
-            binding.content.setText(arguments?.textArg)
+            content.setText(arguments?.textArg)
             content.requestFocus()
             AndroidUtils.showKeyboard(content)
             ok.setOnClickListener {
