@@ -20,6 +20,7 @@ import ru.netology.nmedia.viewmodel.PostViewModel
 class FeedFragment : Fragment() {
 
     private lateinit var binding: FragmentFeedBinding
+    private var currentSize = 0
 
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
@@ -91,17 +92,11 @@ class FeedFragment : Fragment() {
         )
         binding.list.adapter = adapter
         viewModel.data.observe(viewLifecycleOwner) { posts ->
-            adapter.submitList(posts)
-            if (arguments?.textPostID != null) {
-                binding.list.scrollToPosition(
-                    posts.indexOfFirst {
-                        it.id == arguments?.textPostID?.toLong()
-                    }
-                )
-                Bundle().apply {
-                    textPostID = null
-                }
+            val newPost = currentSize < posts.size && currentSize > 0
+            adapter.submitList(posts) {
+                if (newPost) binding.list.smoothScrollToPosition(0)
             }
+            currentSize = 0
         }
         viewModel.edited.observe(viewLifecycleOwner) { post ->
             if (post.id != 0L) {
@@ -114,6 +109,7 @@ class FeedFragment : Fragment() {
             }
         }
         binding.add.setOnClickListener {
+            currentSize = adapter.currentList.size
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 

@@ -8,5 +8,5 @@ interface PostsSetupClickListeners {
     fun onRemoveListener(post: Post)
     fun onEditListener(post: Post)
     fun onPlayListener(post: Post)
-    fun onPostListener(post: Post)
+    fun onPostListener(post: Post) {}
 }

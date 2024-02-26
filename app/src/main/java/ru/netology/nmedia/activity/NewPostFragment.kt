@@ -21,10 +21,6 @@ class NewPostFragment : Fragment() {
         ownerProducer = ::requireParentFragment
     )
 
-    companion object {
-        var Bundle.textPostID: String? by StringArg
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,14 +32,9 @@ class NewPostFragment : Fragment() {
             content.requestFocus()
             AndroidUtils.showKeyboard(content)
             ok.setOnClickListener {
-                val postId = viewModel.changeContentAndSave(binding.content.text.toString())
+                viewModel.changeContentAndSave(binding.content.text.toString())
                 AndroidUtils.hideKeyboard(requireView())
-                findNavController().navigate(
-                    R.id.action_newPostFragment_to_feedFragment,
-                    Bundle().apply {
-                        textPostID = postId
-                    }
-                )
+                findNavController().navigateUp()
 
             }
         }
