@@ -48,16 +48,6 @@ class FeedFragment : Fragment() {
             }
             currentSize = 0
         }
-        viewModel.edited.observe(viewLifecycleOwner) { post ->
-            if (post.id != 0L) {
-                findNavController().navigate(
-                    R.id.newPostFragment,
-                    Bundle().apply {
-                        textArg = post.content
-                    }
-                )
-            }
-        }
         binding.add.setOnClickListener {
             currentSize = adapter.currentList.size
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)

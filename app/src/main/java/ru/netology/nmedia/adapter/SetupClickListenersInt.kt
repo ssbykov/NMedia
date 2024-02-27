@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -50,6 +51,12 @@ open class SetupClickListeners(
 
     override fun onEditListener(post: Post) {
         viewModel.edit(post)
+        fragment.findNavController().navigate(
+            R.id.newPostFragment,
+            Bundle().apply {
+                textArg = post.content
+            }
+        )
     }
 
     override fun onPlayListener(post: Post) {
