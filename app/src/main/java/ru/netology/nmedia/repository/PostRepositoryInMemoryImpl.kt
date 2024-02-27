@@ -126,4 +126,8 @@ class PostRepositoryInMemoryImpl : PostRepository {
         }
     }
 
+    override fun getById(id: Long): Post {
+        return posts.first { it.id == id }
+    }
+
 }

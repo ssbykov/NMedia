@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:paddingTop="4dp"
     android:paddingBottom="4dp"
-    tools:context=".activity.MainActivity">
+    tools:context=".activity.FeedFragment">
 
     <ImageView
         android:id="@+id/avatar"
@@ -67,14 +67,10 @@
 
     <TextView
         android:id="@+id/content"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autoLink="web"
-        android:padding="4dp"
-        app:layout_constraintBottom_toTopOf="@id/preview"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/barrier"
+        app:layout_constraintTop_toTopOf="@id/barrier"
         tools:text="@sample/posts.json/data/content" />
 
     <ImageView
