@@ -32,8 +32,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value = empty
     }
 
-    fun getById(postId: Long) = repository.getById(postId)
-
     fun changeContentAndSave(content: String): String? {
         var postId: String? = null
         edited.value?.let {

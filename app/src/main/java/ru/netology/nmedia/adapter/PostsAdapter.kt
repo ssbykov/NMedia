@@ -14,7 +14,7 @@ import ru.netology.nmedia.utils.formatCount
 
 
 class PostsAdapter(
-    private val setupClickListeners: PostsSetupClickListeners,
+    private val setupClickListeners: SetupClickListeners,
 ) :
     ListAdapter<Post, PostViewHolder>(PostDiffCallback) {
 
@@ -38,7 +38,7 @@ object PostDiffCallback : DiffUtil.ItemCallback<Post>() {
 
 class PostViewHolder(
     private val binding: PostCardBinding,
-    private val setupClickListeners: PostsSetupClickListeners,
+    private val setupClickListeners: SetupClickListeners,
 ) :
     RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
