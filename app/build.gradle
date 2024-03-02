@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.kapt'
 }
 
 android {
@@ -43,14 +44,13 @@ dependencies {
     def fragment_version = "1.6.2"
     def gson_version = "2.10.1"
     def nav_version = "2.7.7"
+    def room_version = "2.6.1"
 
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
-    // LiveData
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
     implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
     testImplementation("androidx.arch.core:core-testing:$arch_version")
@@ -60,6 +60,10 @@ dependencies {
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "com.google.code.gson:gson:$gson_version"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
