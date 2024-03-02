@@ -18,4 +18,5 @@
     <string name="chooser_sharing_post">Sharing text</string>
     <string name="play_video">Play video</string>
     <string name="video_preview">Video preview</string>
+    <string name="google_api_unavailability">Google Api unavailability</string>
 </resources>
