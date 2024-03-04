@@ -68,8 +68,8 @@ class FCMService : FirebaseMessagingService() {
 
     }
 
-    private fun <T : Any>  handleNotification(
-        obj: T,
+    private fun handleNotification(
+        obj: Any,
         message: RemoteMessage,
         stringRes: Int,
         smallIconRes: Int = R.drawable.ic_notification,
@@ -77,7 +77,8 @@ class FCMService : FirebaseMessagingService() {
     ) {
         val content = gson.fromJson(
             message.data[content],
-            obj::class.java)
+            obj::class.java
+        )
 
         val strings = content.javaClass.declaredFields.filter {
             it.isAccessible = true
@@ -97,7 +98,7 @@ class FCMService : FirebaseMessagingService() {
                 if (content is NewPost) {
                     it.setStyle(
                         NotificationCompat.BigTextStyle()
-                            .bigText(content.content)
+                            .bigText("${content.content.substring(0,100)}...")
                     )
                 }
             }
