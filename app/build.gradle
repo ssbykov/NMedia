@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id 'org.jetbrains.kotlin.kapt'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -36,6 +37,7 @@ android {
 }
 
 dependencies {
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.4.1'
     def lifecycle_version = "2.7.0"
     def arch_version = "2.2.0"
     def activity_version = "1.8.2"
@@ -63,6 +65,7 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
+    implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

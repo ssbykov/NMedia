@@ -46,7 +46,7 @@ class FeedFragment : Fragment() {
             adapter.submitList(posts) {
                 if (newPost) binding.list.smoothScrollToPosition(0)
             }
-            currentSize = 0
+            currentSize = posts.size
         }
         binding.add.setOnClickListener {
             currentSize = adapter.currentList.size

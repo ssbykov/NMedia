@@ -11,4 +11,9 @@
     <string name="chooser_sharing_post">Передаваемый текст</string>
     <string name="play_video">Посмотреть видео</string>
     <string name="video_preview">Предпросмотр видео</string>
+    <string name="google_api_unavailability">Google Api недоступно</string>
+    <string name="notification_user_liked">Пользователь %1$s поставил лайк посту %2$s</string>
+    <string name="channel_remote_name">Сервер уведомлений</string>
+    <string name="channel_remote_description">Уведомление от сервера</string>
+    <string name="notification_user_new_post">%1$s опубликовал новый пост: %2$s</string>
 </resources>
