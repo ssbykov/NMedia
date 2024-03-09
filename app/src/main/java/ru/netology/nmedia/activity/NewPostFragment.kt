@@ -26,8 +26,20 @@ class NewPostFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val binding = FragmentNewPostBinding.inflate(inflater, container, false)
+
         with(binding) {
-            content.setText(arguments?.textArg)
+            val draftPrefs =
+                root.context.getSharedPreferences("draft", android.content.Context.MODE_PRIVATE)
+            val key = "newPost"
+
+            if (arguments != null) {
+                content.setText(arguments?.textArg)
+            } else {
+                val draft = draftPrefs.getString(key, "").toString()
+                content.setText(draft)
+                draftPrefs.edit().putString(key, "").apply()
+            }
+
             content.requestFocus()
             AndroidUtils.showKeyboard(content)
             ok.setOnClickListener {
@@ -38,7 +50,11 @@ class NewPostFragment : Fragment() {
             }
             val callback = object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    viewModel.clear()
+                    if (arguments != null) {
+                        viewModel.clear()
+                    } else {
+                        draftPrefs.edit().putString(key, content.text.toString()).apply()
+                    }
                     findNavController().navigateUp()
                 }
             }
