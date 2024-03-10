@@ -3,6 +3,7 @@ package ru.netology.nmedia.adapter
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.activity.result.ActivityResultLauncher
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
@@ -23,6 +24,7 @@ interface SetupClickListenersInt {
 open class SetupClickListeners(
     private val viewModel: PostViewModel,
     private val fragment: Fragment,
+    private val launcher: ActivityResultLauncher<Intent>
 ) : SetupClickListenersInt {
 
     override fun onLikeListener(post: Post) {
@@ -38,7 +40,8 @@ open class SetupClickListeners(
 
         val shareChooser =
             Intent.createChooser(shareIntent, fragment.getString(R.string.chooser_sharing_post))
-        fragment.startActivity(shareChooser)
+//        fragment.startActivity(shareChooser)
+        launcher.launch(shareChooser)
         viewModel.shareById(post.id)
     }
 
@@ -70,8 +73,9 @@ open class SetupClickListeners(
 
 class PostSetupClickListeners(
     viewModel: PostViewModel,
-    private val fragment: Fragment
-) : SetupClickListeners(viewModel, fragment) {
+    private val fragment: Fragment,
+    launcher: ActivityResultLauncher<Intent>
+) : SetupClickListeners(viewModel, fragment, launcher) {
     override fun onRemoveListener(post: Post) {
         super.onRemoveListener(post)
         fragment.findNavController().navigateUp()
@@ -81,7 +85,8 @@ class PostSetupClickListeners(
 class PostsSetupClickListeners(
     viewModel: PostViewModel,
     private val fragment: Fragment,
-) : SetupClickListeners(viewModel, fragment) {
+    launcher: ActivityResultLauncher<Intent>
+) : SetupClickListeners(viewModel, fragment, launcher) {
 
     companion object {
         var Bundle.textPostID: String? by StringArg
