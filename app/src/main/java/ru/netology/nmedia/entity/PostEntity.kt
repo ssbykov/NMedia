@@ -2,8 +2,6 @@ package ru.netology.nmedia.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import org.mapstruct.Mapper
-import ru.netology.nmedia.dto.Post
 
 @Entity
 data class PostEntity(
