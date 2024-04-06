@@ -36,7 +36,18 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     val edited = MutableLiveData(empty)
 
-    fun likeById(id: Long) = repository.likeById(id)
+    fun likeById(post: Post) {
+        thread {
+            _data.postValue(FeedModel(load = true))
+            try {
+                repository.likeById(post)
+                val posts = repository.getAll()
+                FeedModel(posts = posts, empty = posts.isEmpty())
+            } catch (e: IOException) {
+                FeedModel(error = true)
+            }.also(_data::postValue)
+        }
+    }
     fun shareById(id: Long) = repository.shareById(id)
 
     fun edit(post: Post) {
