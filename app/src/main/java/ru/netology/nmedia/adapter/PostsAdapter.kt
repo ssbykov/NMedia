@@ -47,7 +47,7 @@ class PostViewHolder(
         with(binding) {
             author.text = post.author
             published.text = SimpleDateFormat("dd MMMM в H:mm", Locale("ru"))
-                .format(post.published)
+                .format(post.published * 1000)
             content.text = post.content
             like.isChecked = post.likedByMe
             like.text = formatCount(post.likes)

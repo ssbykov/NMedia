@@ -44,11 +44,9 @@ open class SetupClickListeners(
     }
 
     override fun onRemoveListener(post: Post) {
-        thread {
-            viewModel.removeById(post.id)
-            if (viewModel.edited.value?.id == post.id) {
-                viewModel.clear()
-            }
+        viewModel.removeById(post.id)
+        if (viewModel.edited.value?.id == post.id) {
+            viewModel.clear()
         }
     }
 

@@ -38,13 +38,25 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun likeById(id: Long) = repository.likeById(id)
     fun shareById(id: Long) = repository.shareById(id)
-    fun removeById(id: Long) = repository.removeById(id)
+
     fun edit(post: Post) {
         edited.value = post
     }
 
     init {
         loadPosts()
+    }
+    fun removeById(id: Long) {
+        thread {
+            _data.postValue(FeedModel(load = true))
+            try {
+                repository.removeById(id)
+                val posts = repository.getAll()
+                FeedModel(posts = posts, empty = posts.isEmpty())
+            } catch (e: IOException) {
+                FeedModel(error = true)
+            }.also(_data::postValue)
+        }
     }
 
     fun loadPosts() {
@@ -69,8 +81,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 thread {
                     _postCreated.postValue(NewPostModel(load = true))
                     try {
-                        val newPost =
-                            repository.save(it.copy(content = content, published = Date().time))
+                        val newPost = repository
+                            .save(it.copy(content = content, published = Date().time))
                         _postCreated.postValue(NewPostModel(post = newPost))
                         edited.postValue(empty)
                     } catch (e: IOException) {
