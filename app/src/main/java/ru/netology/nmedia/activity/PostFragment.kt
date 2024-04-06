@@ -26,12 +26,22 @@ class PostFragment : Fragment() {
         val binding = FragmentPostBinding.inflate(inflater, container, false)
         val postId: Long = (arguments?.textPostID ?: return binding.root).toLong()
 
-        viewModel.data.observe(viewLifecycleOwner) { posts ->
-            posts.find { it.id == postId }?.let {
+//        viewModel.data.value?.let { feedModel ->
+//            feedModel.posts.find { it.id == postId }
+//        }?.let { post ->
+//            PostViewHolder(
+//                binding.postCard,
+//                PostSetupClickListeners(viewModel, this)
+//            ).bind(post)
+//        }
+//
+        viewModel.data.observe(viewLifecycleOwner) { feedModel ->
+            val post = feedModel?.posts?.find { it.id == postId }
+            if (post != null) {
                 PostViewHolder(
                     binding.postCard,
                     PostSetupClickListeners(viewModel, this)
-                ).bind(it)
+                ).bind(post)
             }
         }
         return binding.root

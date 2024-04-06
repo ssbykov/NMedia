@@ -6,10 +6,10 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:fillViewport="true"
         android:fadeScrollbars="false"
-        android:scrollbars="vertical"
-        android:paddingBottom="?attr/actionBarSize">
+        android:fillViewport="true"
+        android:paddingBottom="?attr/actionBarSize"
+        android:scrollbars="vertical">
 
         <EditText
             android:id="@+id/content"
@@ -21,6 +21,8 @@
             android:importantForAutofill="no"
             android:inputType="textMultiLine"
             android:padding="8dp" />
+
+
     </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.bottomappbar.BottomAppBar
@@ -37,5 +39,12 @@
         android:contentDescription="@string/edit_message"
         app:layout_anchor="@id/bottomAppBar"
         app:srcCompat="@drawable/ic_save_48" />
+
+    <ProgressBar
+        android:id="@+id/progressNew"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

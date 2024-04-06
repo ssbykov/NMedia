@@ -10,6 +10,7 @@ import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
+import kotlin.concurrent.thread
 
 interface SetupClickListenersInt {
     fun onLikeListener(post: Post)
@@ -43,9 +44,11 @@ open class SetupClickListeners(
     }
 
     override fun onRemoveListener(post: Post) {
-        viewModel.removeById(post.id)
-        if (viewModel.edited.value?.id == post.id) {
-            viewModel.clear()
+        thread {
+            viewModel.removeById(post.id)
+            if (viewModel.edited.value?.id == post.id) {
+                viewModel.clear()
+            }
         }
     }
 

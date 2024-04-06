@@ -11,6 +11,8 @@ import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.PostCardBinding
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.utils.formatCount
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 
 class PostsAdapter(
@@ -44,7 +46,8 @@ class PostViewHolder(
     fun bind(post: Post) {
         with(binding) {
             author.text = post.author
-            published.text = post.published
+            published.text = SimpleDateFormat("dd MMMM в H:mm", Locale("ru"))
+                .format(post.published)
             content.text = post.content
             like.isChecked = post.likedByMe
             like.text = formatCount(post.likes)
