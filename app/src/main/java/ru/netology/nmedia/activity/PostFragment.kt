@@ -25,7 +25,7 @@ class PostFragment : Fragment() {
     ): View {
 
         val binding = FragmentPostBinding.inflate(inflater, container, false)
-        val postId: Long = (arguments?.textPostID ?: return binding.root).toLong()
+        val postId = (arguments?.textPostID ?: return binding.root).toLong()
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
             val post = state?.posts?.find { it.id == postId }

@@ -45,6 +45,7 @@ class PostViewHolder(
     RecyclerView.ViewHolder(binding.root) {
     fun bind(post: Post) {
         with(binding) {
+            //заполнение значений элементов поста
             author.text = post.author
             published.text = SimpleDateFormat("dd MMMM в H:mm", Locale("ru"))
                 .format(post.published * 1000)
@@ -53,6 +54,8 @@ class PostViewHolder(
             like.text = formatCount(post.likes)
             shear.text = formatCount(post.shares)
             views.text = formatCount(post.views)
+
+            // установка слушателей
             like.setOnClickListener {
                 setupClickListeners.onLikeListener(post)
             }

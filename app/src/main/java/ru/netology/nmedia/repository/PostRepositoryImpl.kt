@@ -19,7 +19,7 @@ class PostRepositoryImpl : PostRepository {
     private val typeToken = object : TypeToken<List<Post>>() {}
 
     companion object {
-        private const val BASE_URL = "http://10.0.2.2:9999"
+        private const val BASE_URL = "http://10.0.2.2:9999/api/posts"
         private val jsonType = "application/json".toMediaType()
     }
 
@@ -34,7 +34,7 @@ class PostRepositoryImpl : PostRepository {
 
     override fun getAll(): List<Post> {
         val response = baseRequest {
-            url("$BASE_URL/api/slow/posts")
+            url(BASE_URL)
             get()
         }
         return gson.fromJson(response, typeToken.type)
@@ -42,14 +42,14 @@ class PostRepositoryImpl : PostRepository {
 
     override fun removeById(id: Long) {
         baseRequest {
-            url("$BASE_URL/api/posts/$id")
+            url("$BASE_URL/$id")
             delete(gson.toJson(id).toString().toRequestBody(jsonType))
         }
     }
 
     override fun save(post: Post): Post {
         val response = baseRequest {
-            url("$BASE_URL/api/slow/posts")
+            url(BASE_URL)
             post(gson.toJson(post, Post::class.java).toString().toRequestBody(jsonType))
         }
         return gson.fromJson(response, Post::class.java)
@@ -58,7 +58,7 @@ class PostRepositoryImpl : PostRepository {
     override fun likeById(post: Post) {
         val body = gson.toJson(post.id).toString().toRequestBody(jsonType)
         baseRequest {
-            url("$BASE_URL/api/slow/posts/${post.id}/likes")
+            url("$BASE_URL/${post.id}/likes")
             if (post.likedByMe) delete(body) else post(body)
         }
     }
@@ -70,6 +70,10 @@ class PostRepositoryImpl : PostRepository {
 
 
     override fun getById(id: Long): Post {
-        TODO("Not yet implemented")
+        val response = baseRequest {
+            url("$BASE_URL/$id")
+            get()
+        }
+        return gson.fromJson(response, typeToken.type)
     }
 }

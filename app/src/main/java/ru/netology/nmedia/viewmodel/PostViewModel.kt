@@ -36,50 +36,44 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     val edited = MutableLiveData(empty)
 
-    fun likeById(post: Post) {
+    init {
+        loadPosts()
+    }
+
+    fun loadPosts(
+        getPosts: (() -> List<Post>) = { repository.getAll() },
+        addFun: (() -> Unit)? = null
+    ) {
         thread {
             _data.postValue(FeedModel(load = true))
             try {
-                repository.likeById(post)
-                val posts = repository.getAll()
+                addFun?.invoke()
+                val posts = getPosts.invoke()
                 FeedModel(posts = posts, empty = posts.isEmpty())
             } catch (e: IOException) {
                 FeedModel(error = true)
             }.also(_data::postValue)
         }
     }
+
+    fun likeById(post: Post) {
+        loadPosts { repository.likeById(post) }
+    }
+
     fun shareById(id: Long) = repository.shareById(id)
+    fun getById(id: Long) {
+        loadPosts(
+            getPosts = { listOf(repository.getById(id)) },
+            addFun = { repository.removeById(id) }
+        )
+    }
 
     fun edit(post: Post) {
         edited.value = post
     }
 
-    init {
-        loadPosts()
-    }
     fun removeById(id: Long) {
-        thread {
-            _data.postValue(FeedModel(load = true))
-            try {
-                repository.removeById(id)
-                val posts = repository.getAll()
-                FeedModel(posts = posts, empty = posts.isEmpty())
-            } catch (e: IOException) {
-                FeedModel(error = true)
-            }.also(_data::postValue)
-        }
-    }
-
-    fun loadPosts() {
-        thread {
-            _data.postValue(FeedModel(load = true))
-            try {
-                val posts = repository.getAll()
-                FeedModel(posts = posts, empty = posts.isEmpty())
-            } catch (e: IOException) {
-                FeedModel(error = true)
-            }.also(_data::postValue)
-        }
+        loadPosts(addFun = { repository.removeById(id) })
     }
 
     fun clear() {
@@ -96,6 +90,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                             .save(it.copy(content = content, published = Date().time))
                         _postCreated.postValue(NewPostModel(post = newPost))
                         edited.postValue(empty)
+                        if (newPost.id == 0L) {
+                            _postCreated.postValue(NewPostModel(error = true))
+                        }
                     } catch (e: IOException) {
                         _postCreated.postValue(NewPostModel(error = true))
                     }

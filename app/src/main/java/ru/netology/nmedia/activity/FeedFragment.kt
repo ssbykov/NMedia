@@ -47,9 +47,11 @@ class FeedFragment : Fragment() {
             val newSize = state?.posts?.size ?: 0
 
             adapter.submitList(state.posts) {
-                if (currentSize in 1..<newSize) binding.list.smoothScrollToPosition(0)
+                if (currentSize in 1..<newSize) {
+                    binding.list.smoothScrollToPosition(0)
+                    currentSize = newSize
+                }
             }
-            currentSize = newSize
             binding.errorGroup.isVisible = state.error
             binding.progress.isVisible = state.load
             binding.emptyTest.isVisible = state.empty
@@ -57,6 +59,11 @@ class FeedFragment : Fragment() {
 
         binding.retry.setOnClickListener {
             viewModel.loadPosts()
+        }
+
+        binding.swiper.setOnRefreshListener {
+            viewModel.loadPosts()
+            binding.swiper.isRefreshing = false
         }
 
         binding.add.setOnClickListener {
