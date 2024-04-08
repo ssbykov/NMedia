@@ -16,4 +16,7 @@
     <string name="channel_remote_name">Сервер уведомлений</string>
     <string name="channel_remote_description">Уведомление от сервера</string>
     <string name="notification_user_new_post">%1$s опубликовал новый пост: %2$s</string>
+    <string name="no_posts">Нет постов</string>
+    <string name="something_went_wrong">Что-то пошло не так</string>
+    <string name="retry">ПОВТОРИТЬ</string>
 </resources>

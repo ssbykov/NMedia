@@ -26,7 +26,7 @@ open class SetupClickListeners(
 ) : SetupClickListenersInt {
 
     override fun onLikeListener(post: Post) {
-        viewModel.likeById(post.id)
+        viewModel.likeById(post)
     }
 
     override fun onShareListener(post: Post) {

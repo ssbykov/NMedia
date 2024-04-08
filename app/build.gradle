@@ -25,6 +25,10 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            manifestPlaceholders.usesCleartextTraffic = false
+        }
+        debug {
+            manifestPlaceholders.usesCleartextTraffic = true
         }
     }
     compileOptions {
@@ -47,15 +51,18 @@ dependencies {
     def gson_version = "2.10.1"
     def nav_version = "2.7.7"
     def room_version = "2.6.1"
+    def okhttp_version = "4.12.0"
+    def firebase_version = "32.8.0"
+    def swipe_version = "1.1.0"
 
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")
+    implementation "androidx.core:core-ktx:1.12.0"
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation "com.google.android.material:material:1.11.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.recyclerview:recyclerview:$recyclerview_version"
-    testImplementation("androidx.arch.core:core-testing:$arch_version")
+    testImplementation "androidx.arch.core:core-testing:$arch_version"
     implementation "androidx.activity:activity-ktx:$activity_version"
     implementation "com.google.android.material:material:$mdc_version"
     implementation "androidx.fragment:fragment-ktx:$fragment_version"
@@ -65,7 +72,9 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation 'org.mapstruct:mapstruct:1.5.5.Final'
-    implementation(platform("com.google.firebase:firebase-bom:32.7.3"))
+    implementation(platform("com.google.firebase:firebase-bom:$firebase_version"))
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$swipe_version"
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

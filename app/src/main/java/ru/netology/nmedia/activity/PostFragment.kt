@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import ru.netology.nmedia.adapter.PostSetupClickListeners
@@ -24,15 +25,20 @@ class PostFragment : Fragment() {
     ): View {
 
         val binding = FragmentPostBinding.inflate(inflater, container, false)
-        val postId: Long = (arguments?.textPostID ?: return binding.root).toLong()
+        val postId = (arguments?.textPostID ?: return binding.root).toLong()
 
-        viewModel.data.observe(viewLifecycleOwner) { posts ->
-            posts.find { it.id == postId }?.let {
+        viewModel.data.observe(viewLifecycleOwner) { state ->
+            val post = state?.posts?.find { it.id == postId }
+            if (post != null && !state.load) {
                 PostViewHolder(
                     binding.postCard,
                     PostSetupClickListeners(viewModel, this)
-                ).bind(it)
+                ).bind(post)
             }
+
+            binding.progressPost.isVisible = state.load
+            binding.postCard.root.isVisible = !state.load
+
         }
         return binding.root
     }
