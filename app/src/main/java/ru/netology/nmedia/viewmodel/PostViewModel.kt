@@ -10,9 +10,7 @@ import ru.netology.nmedia.model.NewPostModel
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
-import java.io.IOException
 import java.util.Date
-import kotlin.concurrent.thread
 
 
 val empty = Post(
@@ -41,28 +39,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         loadPosts()
     }
 
-//    private val getPostsCallback = object : PostRepository.Callback<List<Post>> {
-//        override fun onSuccess(result: List<Post>) {
-//            _data.postValue(FeedModel(posts = result, empty = result.isEmpty()))
-//        }
-//
-//        override fun onError(e: Exception) {
-//            FeedModel(error = true)
-//        }
-//    }
-//    private val getPostCallback = object : PostRepository.Callback<Post> {
-//        override fun onSuccess(result: Post) {
-//            _data.postValue(FeedModel(posts = listOf(result), empty = listOf(result).isEmpty()))
-//        }
-//
-//        override fun onError(e: Exception) {
-//            FeedModel(error = true)
-//        }
-//    }
-
     fun loadPosts() {
         _data.postValue(FeedModel(load = true))
-        repository.getAll(object : PostRepository.Callback<List<Post>> {
+        repository.getAll(object : PostRepository.PostCallback<List<Post>> {
             override fun onSuccess(result: List<Post>) {
                 _data.postValue(FeedModel(posts = result, empty = result.isEmpty()))
             }
@@ -75,22 +54,21 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun likeById(post: Post) {
         _data.postValue(FeedModel(load = true))
-        repository.likeById(post, object : PostRepository.Callback<Post> {
+        repository.likeById(post, object : PostRepository.PostCallback<Post> {
             override fun onSuccess(result: Post) {
-                _data.postValue(FeedModel(posts = listOf(result), empty = listOf(result).isEmpty()))
+                _data.postValue(FeedModel(changed = true))
             }
 
             override fun onError(e: Exception) {
                 FeedModel(error = true)
             }
         })
-        loadPosts()
     }
 
     fun shareById(id: Long) = repository.shareById(id)
     fun getById(id: Long) {
         _data.postValue(FeedModel(load = true))
-        repository.getById(id, object : PostRepository.Callback<Post> {
+        repository.getById(id, object : PostRepository.PostCallback<Post> {
             override fun onSuccess(result: Post) {
                 _data.postValue(FeedModel(posts = listOf(result), empty = listOf(result).isEmpty()))
             }
@@ -107,16 +85,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeById(id: Long) {
         _data.postValue(FeedModel(load = true))
-        repository.removeById(id, object : PostRepository.Callback<Post> {
-            override fun onSuccess(result: Post) {
-                _data.postValue(FeedModel(posts = listOf(result), empty = listOf(result).isEmpty()))
+        repository.removeById(id, object : PostRepository.PostCallback<Post> {
+            override fun onSuccess() {
+                _data.postValue(FeedModel(changed = true))
             }
 
             override fun onError(e: Exception) {
                 FeedModel(error = true)
             }
         })
-        loadPosts()
     }
 
     fun clear() {
@@ -128,7 +105,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             if (it.content != content) {
                 _postCreated.postValue(NewPostModel(load = true))
                 repository.save(it.copy(content = content, published = Date().time),
-                    object : PostRepository.Callback<Post> {
+                    object : PostRepository.PostCallback<Post> {
                         override fun onSuccess(result: Post) {
                             _postCreated.postValue(NewPostModel(post = result))
                             edited.postValue(empty)
@@ -138,7 +115,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                             _postCreated.postValue(NewPostModel(error = true))
                         }
                     })
-                _postCreated.postValue(NewPostModel(error = true))
             }
         }
     }

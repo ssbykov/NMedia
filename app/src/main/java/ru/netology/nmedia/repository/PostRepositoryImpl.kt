@@ -20,16 +20,16 @@ class PostRepositoryImpl : PostRepository {
         .build()
 
     private val gson = Gson()
-//    private val typeToken = object : TypeToken<List<Post>>() {}
 
     companion object {
-        private const val BASE_URL = "http://10.0.2.2:9999/api/posts"
+        private const val BASE_URL = "http://10.0.2.2:9999/api/slow/posts"
         private val jsonType = "application/json".toMediaType()
     }
 
     private fun <T> baseRequest(
-        callback: PostRepository.Callback<T>,
-        requestBuilder: Request.Builder.() -> Unit
+        callback: PostRepository.PostCallback<T>,
+        typeToken: TypeToken<T>,
+        requestBuilder: Request.Builder.() -> Unit,
     ) {
         val builder = Request.Builder()
         builder.requestBuilder()
@@ -43,8 +43,11 @@ class PostRepositoryImpl : PostRepository {
                 override fun onResponse(call: Call, response: Response) {
                     val body = response.body?.string() ?: throw RuntimeException("body is null")
                     try {
-                        val typeToken = object : TypeToken<T>() {}
-                        callback.onSuccess(gson.fromJson(body, typeToken))
+                        if (body.isNotEmpty()) {
+                            callback.onSuccess(gson.fromJson(body, typeToken.type))
+                        } else {
+                            callback.onSuccess()
+                        }
                     } catch (e: Exception) {
                         callback.onError(e)
                     }
@@ -52,30 +55,30 @@ class PostRepositoryImpl : PostRepository {
             })
     }
 
-    override fun getAll(callback: PostRepository.Callback<List<Post>>) {
-        baseRequest(callback) {
+    override fun getAll(callback: PostRepository.PostCallback<List<Post>>) {
+        baseRequest(callback, object : TypeToken<List<Post>>() {}) {
             url(BASE_URL)
             get()
         }
     }
 
-    override fun removeById(id: Long, callback: PostRepository.Callback<Post>) {
-        baseRequest(callback) {
+    override fun removeById(id: Long, callback: PostRepository.PostCallback<Post>) {
+        baseRequest(callback, object : TypeToken<Post>() {}) {
             url("$BASE_URL/$id")
             delete(gson.toJson(id).toString().toRequestBody(jsonType))
         }
     }
 
-    override fun save(post: Post, callback: PostRepository.Callback<Post>) {
-        baseRequest(callback) {
+    override fun save(post: Post, callback: PostRepository.PostCallback<Post>) {
+        baseRequest(callback, object : TypeToken<Post>() {}) {
             url(BASE_URL)
             post(gson.toJson(post, Post::class.java).toString().toRequestBody(jsonType))
         }
     }
 
-    override fun likeById(post: Post, callback: PostRepository.Callback<Post>) {
+    override fun likeById(post: Post, callback: PostRepository.PostCallback<Post>) {
         val body = gson.toJson(post.id).toString().toRequestBody(jsonType)
-        baseRequest(callback) {
+        baseRequest(callback, object : TypeToken<Post>() {}) {
             url("$BASE_URL/${post.id}/likes")
             if (post.likedByMe) delete(body) else post(body)
         }
@@ -87,8 +90,8 @@ class PostRepositoryImpl : PostRepository {
     }
 
 
-    override fun getById(id: Long, callback: PostRepository.Callback<Post>) {
-        baseRequest(callback) {
+    override fun getById(id: Long, callback: PostRepository.PostCallback<Post>) {
+        baseRequest(callback, object : TypeToken<Post>() {}) {
             url("$BASE_URL/$id")
             get()
         }
