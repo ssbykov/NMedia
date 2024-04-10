@@ -28,10 +28,6 @@ class PostFragment : Fragment() {
         val postId = (arguments?.textPostID ?: return binding.root).toLong()
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
-            if (state.changed) {
-                viewModel.loadPosts()
-                return@observe
-            }
             val post = state?.posts?.find { it.id == postId }
             if (post != null && !state.load) {
                 PostViewHolder(
@@ -41,7 +37,6 @@ class PostFragment : Fragment() {
             }
 
             binding.progressPost.isVisible = state.load
-            binding.postCard.root.isVisible = !state.load
 
         }
         return binding.root

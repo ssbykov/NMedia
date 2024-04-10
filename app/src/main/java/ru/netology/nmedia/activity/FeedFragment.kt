@@ -44,10 +44,6 @@ class FeedFragment : Fragment() {
         binding.list.adapter = adapter
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
-            if (state.changed) {
-                viewModel.loadPosts()
-                return@observe
-            }
             val newSize = state?.posts?.size ?: 0
 
             adapter.submitList(state.posts) {

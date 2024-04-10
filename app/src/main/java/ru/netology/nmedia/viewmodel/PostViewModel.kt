@@ -53,10 +53,13 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun likeById(post: Post) {
-        _data.postValue(FeedModel(load = true))
+        _data.postValue(_data.value?.copy(load = true))
         repository.likeById(post, object : PostRepository.PostCallback<Post> {
             override fun onSuccess(result: Post) {
-                _data.postValue(FeedModel(changed = true))
+                val posts = _data.value?.posts.orEmpty().map {
+                    if (it.id == result.id) result else it
+                }
+                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
             }
 
             override fun onError(e: Exception) {
@@ -84,10 +87,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun removeById(id: Long) {
-        _data.postValue(FeedModel(load = true))
+        _data.postValue(_data.value?.copy(load = true))
         repository.removeById(id, object : PostRepository.PostCallback<Post> {
             override fun onSuccess() {
-                _data.postValue(FeedModel(changed = true))
+                val posts = _data.value?.posts.orEmpty().filter { it.id != id }
+                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
             }
 
             override fun onError(e: Exception) {
@@ -107,6 +111,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 repository.save(it.copy(content = content, published = Date().time),
                     object : PostRepository.PostCallback<Post> {
                         override fun onSuccess(result: Post) {
+                            val posts = _data.value?.posts.orEmpty().filter { post ->
+                                post.id != result.id
+                            }.plus(result).sortedByDescending {post -> post.id }
+                            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
                             _postCreated.postValue(NewPostModel(post = result))
                             edited.postValue(empty)
                         }
