@@ -37,7 +37,6 @@ class PostFragment : Fragment() {
             }
 
             binding.progressPost.isVisible = state.load
-            binding.postCard.root.isVisible = !state.load
 
         }
         return binding.root

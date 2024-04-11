@@ -64,9 +64,7 @@ class NewPostFragment : Fragment() {
                 }
                 if (state?.post != null) {
                     findNavController().navigateUp()
-                    viewModel.loadPosts()
                 }
-
             }
 
             val callback = object : OnBackPressedCallback(true) {
