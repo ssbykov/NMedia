@@ -26,4 +26,6 @@
     <string name="no_posts">No posts</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="retry">RETRY</string>
+    <string name="base_url" translatable="false">"http://10.0.2.2:9999/api/slow/posts"</string>
+    <string name="attachment_image">Attachment image</string>
 </resources>

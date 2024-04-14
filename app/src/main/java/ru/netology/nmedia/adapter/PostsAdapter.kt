@@ -1,5 +1,6 @@
 package ru.netology.nmedia.adapter
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,6 +8,9 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import ru.netology.nmedia.Constants.BASE_URL_AVATAR
+import ru.netology.nmedia.Constants.BASE_URL_IMAGES
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.PostCardBinding
 import ru.netology.nmedia.dto.Post
@@ -43,6 +47,7 @@ class PostViewHolder(
     private val setupClickListeners: SetupClickListeners,
 ) :
     RecyclerView.ViewHolder(binding.root) {
+    @SuppressLint("ResourceType")
     fun bind(post: Post) {
         with(binding) {
             //заполнение значений элементов поста
@@ -54,6 +59,24 @@ class PostViewHolder(
             like.text = formatCount(post.likes)
             shear.text = formatCount(post.shares)
             views.text = formatCount(post.views)
+
+            Glide.with(avatar)
+                .load("$BASE_URL_AVATAR${post.authorAvatar}")
+                .placeholder(R.drawable.ic_loading_100dp)
+                .error(R.drawable.ic_error_100dp)
+                .timeout(30_000)
+                .circleCrop()
+                .into(avatar)
+
+            if (post.attachment != null) {
+                Glide.with(attachment)
+                    .load("$BASE_URL_IMAGES${post.attachment?.url}")
+                    .placeholder(R.drawable.ic_loading_100dp)
+                    .error(R.drawable.ic_error_100dp)
+                    .timeout(30_000)
+                    .into(attachment)
+                attachment.visibility = View.VISIBLE
+            } else attachment.visibility = View.GONE
 
             // установка слушателей
             like.setOnClickListener {
