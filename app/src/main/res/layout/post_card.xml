@@ -71,6 +71,7 @@
         android:layout_height="wrap_content"
         android:autoLink="web"
         app:layout_constraintTop_toTopOf="@id/barrier"
+        app:layout_constraintBottom_toTopOf="@id/preview"
         tools:text="@sample/posts.json/data/content" />
 
     <ImageView
@@ -82,8 +83,22 @@
         android:cropToPadding="true"
         android:scaleType="centerInside"
         android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/bottomBarrier"
+        app:layout_constraintBottom_toTopOf="@id/attachment"
         app:layout_constraintTop_toBottomOf="@id/content"
+        app:srcCompat="@drawable/preview"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <ImageView
+        android:id="@+id/attachment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/attachment_image"
+        android:cropToPadding="true"
+        android:scaleType="centerInside"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/bottomBarrier"
+        app:layout_constraintTop_toBottomOf="@id/preview"
         app:srcCompat="@drawable/preview"
         tools:layout_editor_absoluteX="0dp" />
 

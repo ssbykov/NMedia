@@ -9,6 +9,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import ru.netology.nmedia.Constants.BASE_URL_POST
 import ru.netology.nmedia.dto.Post
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -22,7 +23,7 @@ class PostRepositoryImpl : PostRepository {
     private val gson = Gson()
 
     companion object {
-        private const val BASE_URL = "http://10.0.2.2:9999/api/slow/posts"
+        private const val BASE_URL = BASE_URL_POST
         private val jsonType = "application/json".toMediaType()
     }
 
