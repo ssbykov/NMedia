@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import ru.netology.nmedia.Constants.BASE_URL_AVATAR
 import ru.netology.nmedia.Constants.BASE_URL_IMAGES
+import ru.netology.nmedia.Constants.SDRF
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.PostCardBinding
 import ru.netology.nmedia.dto.Post
@@ -52,7 +53,7 @@ class PostViewHolder(
         with(binding) {
             //заполнение значений элементов поста
             author.text = post.author
-            published.text = SimpleDateFormat("dd MMMM в H:mm", Locale("ru"))
+            published.text = SimpleDateFormat(SDRF, Locale("ru"))
                 .format(post.published * 1000)
             content.text = post.content
             like.isChecked = post.likedByMe
