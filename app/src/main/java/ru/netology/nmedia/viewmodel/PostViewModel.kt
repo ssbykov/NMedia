@@ -69,18 +69,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun shareById(id: Long) = repository.shareById(id)
-    fun getById(id: Long) {
-        _data.postValue(FeedModel(load = true))
-        repository.getById(id, object : PostRepository.PostCallback<Post> {
-            override fun onSuccess(result: Post) {
-                _data.postValue(FeedModel(posts = listOf(result), empty = listOf(result).isEmpty()))
-            }
-
-            override fun onError(e: Exception) {
-                FeedModel(error = true)
-            }
-        })
-    }
 
     fun edit(post: Post) {
         edited.value = post
@@ -88,8 +76,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun removeById(id: Long) {
         _data.postValue(_data.value?.copy(load = true))
-        repository.removeById(id, object : PostRepository.PostCallback<Post> {
-            override fun onSuccess() {
+        repository.removeById(id, object : PostRepository.PostCallback<Unit> {
+            override fun onSuccess(result: Unit) {
                 val posts = _data.value?.posts.orEmpty().filter { it.id != id }
                 _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
             }
@@ -113,7 +101,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                         override fun onSuccess(result: Post) {
                             val posts = _data.value?.posts.orEmpty().filter { post ->
                                 post.id != result.id
-                            }.plus(result).sortedByDescending {post -> post.id }
+                            }.plus(result).sortedByDescending { post -> post.id }
                             _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
                             _postCreated.postValue(NewPostModel(post = result))
                             edited.postValue(empty)
