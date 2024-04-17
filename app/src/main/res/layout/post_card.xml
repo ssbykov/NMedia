@@ -70,8 +70,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:autoLink="web"
-        app:layout_constraintTop_toTopOf="@id/barrier"
         app:layout_constraintBottom_toTopOf="@id/preview"
+        app:layout_constraintTop_toTopOf="@id/barrier"
         tools:text="@sample/posts.json/data/content" />
 
     <ImageView
@@ -99,7 +99,6 @@
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/bottomBarrier"
         app:layout_constraintTop_toBottomOf="@id/preview"
-        app:srcCompat="@drawable/preview"
         tools:layout_editor_absoluteX="0dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -154,6 +153,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="top"
-        app:constraint_referenced_ids="like, shear, views" />
+        app:constraint_referenced_ids="like, shear, views"
+        app:layout_constraintTop_toBottomOf="@id/attachment" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

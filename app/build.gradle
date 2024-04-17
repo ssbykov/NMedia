@@ -20,15 +20,23 @@ android {
     }
 
     buildFeatures.viewBinding true
+    buildFeatures.buildConfig true
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             manifestPlaceholders.usesCleartextTraffic = false
+            buildConfigField "String", "SERVER_IP", "\"192.168.0.106\"" // IP-адрес для мобильного устройства
         }
         debug {
             manifestPlaceholders.usesCleartextTraffic = true
+            buildConfigField "String", "SERVER_IP", "\"10.0.2.2\"" // IP-адрес для эмулятора
+        }
+        debugMobile {
+            manifestPlaceholders.usesCleartextTraffic = true
+            buildConfigField "String", "SERVER_IP", "\"192.168.0.106\""// IP-адрес для мобильного устройства
+            signingConfig signingConfigs.debug
         }
     }
     compileOptions {

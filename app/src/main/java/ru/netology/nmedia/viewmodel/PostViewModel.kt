@@ -68,7 +68,21 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    fun shareById(id: Long) = repository.shareById(id)
+    fun shareById(post: Post) {
+        _data.postValue(_data.value?.copy(load = true))
+        repository.shareById(post, object : PostRepository.PostCallback<Post> {
+            override fun onSuccess(result: Post) {
+                val posts = _data.value?.posts.orEmpty().map {
+                    if (it.id == result.id) result else it
+                }
+                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+            }
+
+            override fun onError(e: Exception) {
+                FeedModel(error = true)
+            }
+        })
+    }
 
     fun edit(post: Post) {
         edited.value = post

@@ -39,7 +39,7 @@ open class SetupClickListeners(
         val shareChooser =
             Intent.createChooser(shareIntent, fragment.getString(R.string.chooser_sharing_post))
         fragment.startActivity(shareChooser)
-        viewModel.shareById(post.id)
+        viewModel.shareById(post)
     }
 
     override fun onRemoveListener(post: Post) {

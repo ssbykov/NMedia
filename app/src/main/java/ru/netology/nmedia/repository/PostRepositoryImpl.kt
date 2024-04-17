@@ -61,8 +61,10 @@ class PostRepositoryImpl : PostRepository {
     }
 
 
-    override fun shareById(id: Long) {
-        TODO("Not yet implemented")
+    override fun shareById(post: Post, callback: PostRepository.PostCallback<Post>) {
+        baseRequest(callback) {
+            PostApi.retrofitService.save(post.copy(shares = post.shares + 1))
+        }
     }
 
 }
