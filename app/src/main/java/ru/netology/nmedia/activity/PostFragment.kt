@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostSetupClickListeners
 import ru.netology.nmedia.adapter.PostViewHolder
 import ru.netology.nmedia.adapter.PostsSetupClickListeners.Companion.textPostID
@@ -37,6 +39,10 @@ class PostFragment : Fragment() {
             }
 
             binding.progressPost.isVisible = state.load
+            if (state.error) {
+                Toast.makeText(context, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
+                viewModel.errorReset()
+            }
 
         }
         return binding.root

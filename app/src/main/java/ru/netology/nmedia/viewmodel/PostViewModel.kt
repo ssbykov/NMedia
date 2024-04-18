@@ -39,15 +39,27 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         loadPosts()
     }
 
+    fun edit(post: Post) {
+        edited.value = post
+    }
+
+    fun clear() {
+        edited.value = empty
+    }
+
+    fun errorReset() {
+        _data.postValue(_data.value?.copy(error = false))
+    }
+
     fun loadPosts() {
-        _data.postValue(FeedModel(load = true))
+        _data.postValue(_data.value?.copy(load = true))
         repository.getAll(object : PostRepository.PostCallback<List<Post>> {
             override fun onSuccess(result: List<Post>) {
                 _data.postValue(FeedModel(posts = result, empty = result.isEmpty()))
             }
 
             override fun onError(e: Exception) {
-                FeedModel(error = true)
+                _data.postValue(_data.value?.copy(load = false, error = true))
             }
         })
     }
@@ -63,7 +75,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             override fun onError(e: Exception) {
-                FeedModel(error = true)
+                _data.postValue(_data.value?.copy(load = false, error = true))
             }
         })
     }
@@ -79,14 +91,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             override fun onError(e: Exception) {
-                FeedModel(error = true)
+                _data.postValue(_data.value?.copy(load = false, error = true))
             }
         })
     }
 
-    fun edit(post: Post) {
-        edited.value = post
-    }
 
     fun removeById(id: Long) {
         _data.postValue(_data.value?.copy(load = true))
@@ -97,13 +106,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             override fun onError(e: Exception) {
-                FeedModel(error = true)
+                _data.postValue(FeedModel(error = true))
             }
         })
-    }
-
-    fun clear() {
-        edited.value = empty
     }
 
     fun changeContentAndSave(content: String) {

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -52,12 +53,18 @@ class FeedFragment : Fragment() {
                     currentSize = newSize
                 }
             }
-            binding.errorGroup.isVisible = state.error
+            binding.errorGroup.isVisible = state.error && state.posts.isEmpty() && !state.load
             binding.progress.isVisible = state.load
-            binding.emptyTest.isVisible = state.empty
+            binding.emptyTest.isVisible = state.posts.isEmpty() && !state.load
+            if (state.error && state.posts.isNotEmpty()) {
+                Toast.makeText(context, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
+                adapter.notifyDataSetChanged()
+                viewModel.errorReset()
+            }
         }
 
         binding.retry.setOnClickListener {
+            binding.errorGroup.isVisible = false
             viewModel.loadPosts()
         }
 

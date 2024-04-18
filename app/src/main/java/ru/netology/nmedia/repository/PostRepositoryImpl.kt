@@ -16,12 +16,13 @@ class PostRepositoryImpl : PostRepository {
 
         call.invoke().enqueue(object : Callback<T> {
             override fun onResponse(call: Call<T>, response: Response<T>) {
-                val body = response.body() ?: throw RuntimeException("body is null")
                 println("Код ответа ${response.code()}")
-                if (!response.isSuccessful) {
+                println("Код ответа ${response.errorBody()}")
+                if (response.code() !in (200..299)) {
                     callback.onError(RuntimeException(response.errorBody()?.string()))
                     return
                 }
+                val body = response.body() ?: throw RuntimeException("body is null")
                 callback.onSuccess(body)
             }
 
