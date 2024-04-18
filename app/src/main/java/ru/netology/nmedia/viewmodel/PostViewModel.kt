@@ -39,15 +39,27 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         loadPosts()
     }
 
+    fun edit(post: Post) {
+        edited.value = post
+    }
+
+    fun clear() {
+        edited.value = empty
+    }
+
+    fun errorReset() {
+        _data.postValue(_data.value?.copy(error = false))
+    }
+
     fun loadPosts() {
-        _data.postValue(FeedModel(load = true))
+        _data.postValue(_data.value?.copy(load = true))
         repository.getAll(object : PostRepository.PostCallback<List<Post>> {
             override fun onSuccess(result: List<Post>) {
                 _data.postValue(FeedModel(posts = result, empty = result.isEmpty()))
             }
 
             override fun onError(e: Exception) {
-                FeedModel(error = true)
+                _data.postValue(_data.value?.copy(load = false, error = true))
             }
         })
     }
@@ -63,45 +75,40 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             override fun onError(e: Exception) {
-                FeedModel(error = true)
+                _data.postValue(_data.value?.copy(load = false, error = true))
             }
         })
     }
 
-    fun shareById(id: Long) = repository.shareById(id)
-    fun getById(id: Long) {
-        _data.postValue(FeedModel(load = true))
-        repository.getById(id, object : PostRepository.PostCallback<Post> {
+    fun shareById(post: Post) {
+        _data.postValue(_data.value?.copy(load = true))
+        repository.shareById(post, object : PostRepository.PostCallback<Post> {
             override fun onSuccess(result: Post) {
-                _data.postValue(FeedModel(posts = listOf(result), empty = listOf(result).isEmpty()))
+                val posts = _data.value?.posts.orEmpty().map {
+                    if (it.id == result.id) result else it
+                }
+                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
             }
 
             override fun onError(e: Exception) {
-                FeedModel(error = true)
+                _data.postValue(_data.value?.copy(load = false, error = true))
             }
         })
     }
 
-    fun edit(post: Post) {
-        edited.value = post
-    }
 
     fun removeById(id: Long) {
         _data.postValue(_data.value?.copy(load = true))
-        repository.removeById(id, object : PostRepository.PostCallback<Post> {
-            override fun onSuccess() {
+        repository.removeById(id, object : PostRepository.PostCallback<Unit> {
+            override fun onSuccess(result: Unit) {
                 val posts = _data.value?.posts.orEmpty().filter { it.id != id }
                 _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
             }
 
             override fun onError(e: Exception) {
-                FeedModel(error = true)
+                _data.postValue(FeedModel(error = true))
             }
         })
-    }
-
-    fun clear() {
-        edited.value = empty
     }
 
     fun changeContentAndSave(content: String) {
@@ -113,7 +120,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                         override fun onSuccess(result: Post) {
                             val posts = _data.value?.posts.orEmpty().filter { post ->
                                 post.id != result.id
-                            }.plus(result).sortedByDescending {post -> post.id }
+                            }.plus(result).sortedByDescending { post -> post.id }
                             _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
                             _postCreated.postValue(NewPostModel(post = result))
                             edited.postValue(empty)

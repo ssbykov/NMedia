@@ -1,100 +1,69 @@
 package ru.netology.nmedia.repository
 
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
-import ru.netology.nmedia.Constants.BASE_URL_POST
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dto.Post
-import java.io.IOException
-import java.util.concurrent.TimeUnit
 
 class PostRepositoryImpl : PostRepository {
 
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .build()
-
-    private val gson = Gson()
-
-    companion object {
-        private const val BASE_URL = BASE_URL_POST
-        private val jsonType = "application/json".toMediaType()
-    }
 
     private fun <T> baseRequest(
         callback: PostRepository.PostCallback<T>,
-        typeToken: TypeToken<T>,
-        requestBuilder: Request.Builder.() -> Unit,
+        call: () -> Call<T>,
     ) {
-        val builder = Request.Builder()
-        builder.requestBuilder()
-        val request = builder.build()
-        return client.newCall(request)
-            .enqueue(object : Callback {
-                override fun onFailure(call: Call, e: IOException) {
-                    callback.onError(e)
-                }
 
-                override fun onResponse(call: Call, response: Response) {
-                    val body = response.body?.string() ?: throw RuntimeException("body is null")
-                    try {
-                        if (body.isNotEmpty()) {
-                            callback.onSuccess(gson.fromJson(body, typeToken.type))
-                        } else {
-                            callback.onSuccess()
-                        }
-                    } catch (e: Exception) {
-                        callback.onError(e)
-                    }
+        call.invoke().enqueue(object : Callback<T> {
+            override fun onResponse(call: Call<T>, response: Response<T>) {
+                if (!response.isSuccessful) {
+                    callback.onError(RuntimeException(response.errorBody()?.string()))
+                    return
                 }
-            })
+                val body = response.body() ?: throw RuntimeException("body is null")
+                callback.onSuccess(body)
+            }
+
+            override fun onFailure(p0: Call<T>, t: Throwable) {
+                callback.onError(Exception(t))
+            }
+
+        })
     }
 
     override fun getAll(callback: PostRepository.PostCallback<List<Post>>) {
-        baseRequest(callback, object : TypeToken<List<Post>>() {}) {
-            url(BASE_URL)
-            get()
-        }
-    }
-
-    override fun removeById(id: Long, callback: PostRepository.PostCallback<Post>) {
-        baseRequest(callback, object : TypeToken<Post>() {}) {
-            url("$BASE_URL/$id")
-            delete(gson.toJson(id).toString().toRequestBody(jsonType))
-        }
-    }
-
-    override fun save(post: Post, callback: PostRepository.PostCallback<Post>) {
-        baseRequest(callback, object : TypeToken<Post>() {}) {
-            url(BASE_URL)
-            post(gson.toJson(post, Post::class.java).toString().toRequestBody(jsonType))
+        baseRequest(callback) {
+            PostApi.retrofitService.getAll()
         }
     }
 
     override fun likeById(post: Post, callback: PostRepository.PostCallback<Post>) {
-        val body = gson.toJson(post.id).toString().toRequestBody(jsonType)
-        baseRequest(callback, object : TypeToken<Post>() {}) {
-            url("$BASE_URL/${post.id}/likes")
-            if (post.likedByMe) delete(body) else post(body)
+        baseRequest(callback) {
+            if (post.likedByMe) {
+                PostApi.retrofitService.unlikeById(post.id)
+            } else {
+                PostApi.retrofitService.likeById(post.id)
+            }
+        }
+    }
+
+    override fun removeById(id: Long, callback: PostRepository.PostCallback<Unit>) {
+        baseRequest(callback) {
+            PostApi.retrofitService.removeById(id)
+        }
+    }
+
+    override fun save(post: Post, callback: PostRepository.PostCallback<Post>) {
+        baseRequest(callback) {
+            PostApi.retrofitService.save(post)
         }
     }
 
 
-    override fun shareById(id: Long) {
-        TODO("Not yet implemented")
-    }
-
-
-    override fun getById(id: Long, callback: PostRepository.PostCallback<Post>) {
-        baseRequest(callback, object : TypeToken<Post>() {}) {
-            url("$BASE_URL/$id")
-            get()
+    override fun shareById(post: Post, callback: PostRepository.PostCallback<Post>) {
+        baseRequest(callback) {
+            PostApi.retrofitService.save(post.copy(shares = post.shares + 1))
         }
     }
+
 }
