@@ -16,9 +16,7 @@ class PostRepositoryImpl : PostRepository {
 
         call.invoke().enqueue(object : Callback<T> {
             override fun onResponse(call: Call<T>, response: Response<T>) {
-                println("Код ответа ${response.code()}")
-                println("Код ответа ${response.errorBody()}")
-                if (response.code() !in (200..299)) {
+                if (!response.isSuccessful) {
                     callback.onError(RuntimeException(response.errorBody()?.string()))
                     return
                 }

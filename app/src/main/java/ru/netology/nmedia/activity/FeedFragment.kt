@@ -58,7 +58,6 @@ class FeedFragment : Fragment() {
             binding.emptyTest.isVisible = state.posts.isEmpty() && !state.load
             if (state.error && state.posts.isNotEmpty()) {
                 Toast.makeText(context, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
-                adapter.notifyDataSetChanged()
                 viewModel.errorReset()
             }
         }
