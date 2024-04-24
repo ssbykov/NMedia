@@ -33,11 +33,7 @@ android {
             manifestPlaceholders.usesCleartextTraffic = true
             buildConfigField "String", "SERVER_IP", "\"10.0.2.2\"" // IP-адрес для эмулятора
         }
-        debugMobile {
-            manifestPlaceholders.usesCleartextTraffic = true
-            buildConfigField "String", "SERVER_IP", "\"192.168.0.106\""// IP-адрес для мобильного устройства
-            signingConfig signingConfigs.debug
-        }
+
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
