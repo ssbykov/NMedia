@@ -99,7 +99,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 _postCreated.postValue(NewPostModel(load = true))
                 viewModelScope.launch {
                     val result =
-                        repository.likeById(it.copy(content = content, published = Date().time))
+                        repository.save(it.copy(content = content, published = Date().time))
                     val posts = _data.value?.posts.orEmpty().filter { post ->
                         post.id != result.id
                     }.plus(result).sortedByDescending { post -> post.id }
