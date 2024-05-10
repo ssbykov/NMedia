@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.NewPostModel
@@ -53,83 +55,58 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadPosts() {
         _data.postValue(_data.value?.copy(load = true))
-        repository.getAll(object : PostRepository.PostCallback<List<Post>> {
-            override fun onSuccess(result: List<Post>) {
-                _data.postValue(FeedModel(posts = result, empty = result.isEmpty()))
-            }
-
-            override fun onError(e: Exception) {
-                _data.postValue(_data.value?.copy(load = false, error = true))
-            }
-        })
+        viewModelScope.launch {
+            val posts = repository.getAll()
+            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+        }
     }
 
     fun likeById(post: Post) {
         _data.postValue(_data.value?.copy(load = true))
-        repository.likeById(post, object : PostRepository.PostCallback<Post> {
-            override fun onSuccess(result: Post) {
-                val posts = _data.value?.posts.orEmpty().map {
-                    if (it.id == result.id) result else it
-                }
-                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+        viewModelScope.launch {
+            val result = repository.likeById(post)
+            val posts = _data.value?.posts.orEmpty().map {
+                if (it.id == result.id) result else it
             }
-
-            override fun onError(e: Exception) {
-                _data.postValue(_data.value?.copy(load = false, error = true))
-            }
-        })
+            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+        }
     }
 
     fun shareById(post: Post) {
         _data.postValue(_data.value?.copy(load = true))
-        repository.shareById(post, object : PostRepository.PostCallback<Post> {
-            override fun onSuccess(result: Post) {
-                val posts = _data.value?.posts.orEmpty().map {
-                    if (it.id == result.id) result else it
-                }
-                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+        viewModelScope.launch {
+            val result = repository.shareById(post)
+            val posts = _data.value?.posts.orEmpty().map {
+                if (it.id == result.id) result else it
             }
-
-            override fun onError(e: Exception) {
-                _data.postValue(_data.value?.copy(load = false, error = true))
-            }
-        })
+            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+        }
     }
 
 
     fun removeById(id: Long) {
         _data.postValue(_data.value?.copy(load = true))
-        repository.removeById(id, object : PostRepository.PostCallback<Unit> {
-            override fun onSuccess(result: Unit) {
-                val posts = _data.value?.posts.orEmpty().filter { it.id != id }
-                _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
-            }
-
-            override fun onError(e: Exception) {
-                _data.postValue(FeedModel(error = true))
-            }
-        })
+        viewModelScope.launch {
+            repository.removeById(id)
+            val posts = _data.value?.posts.orEmpty().filter { it.id != id }
+            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+        }
     }
 
     fun changeContentAndSave(content: String) {
         edited.value?.let {
             if (it.content != content) {
                 _postCreated.postValue(NewPostModel(load = true))
-                repository.save(it.copy(content = content, published = Date().time),
-                    object : PostRepository.PostCallback<Post> {
-                        override fun onSuccess(result: Post) {
-                            val posts = _data.value?.posts.orEmpty().filter { post ->
-                                post.id != result.id
-                            }.plus(result).sortedByDescending { post -> post.id }
-                            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
-                            _postCreated.postValue(NewPostModel(post = result))
-                            edited.postValue(empty)
-                        }
-
-                        override fun onError(e: Exception) {
-                            _postCreated.postValue(NewPostModel(error = true))
-                        }
-                    })
+                viewModelScope.launch {
+                    val result =
+                        repository.likeById(it.copy(content = content, published = Date().time))
+                    val posts = _data.value?.posts.orEmpty().filter { post ->
+                        post.id != result.id
+                    }.plus(result).sortedByDescending { post -> post.id }
+                    _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+                    _postCreated.postValue(NewPostModel(post = result))
+                    edited.postValue(empty)
+                }
             }
         }
     }

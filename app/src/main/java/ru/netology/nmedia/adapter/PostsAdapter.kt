@@ -81,8 +81,8 @@ class PostViewHolder(
 
             // установка слушателей
             like.setOnClickListener {
-                like.isChecked = post.likedByMe
                 setupClickListeners.onLikeListener(post)
+                like.isChecked = post.likedByMe
             }
             shear.setOnClickListener {
                 setupClickListeners.onShareListener(post)
