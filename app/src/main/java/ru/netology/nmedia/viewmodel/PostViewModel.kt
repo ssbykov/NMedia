@@ -54,49 +54,49 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadPosts() {
-        _data.postValue(_data.value?.copy(load = true))
+        _data.value = _data.value?.copy(load = true)
         viewModelScope.launch {
             val posts = repository.getAll()
-            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+            _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
         }
     }
 
     fun likeById(post: Post) {
-        _data.postValue(_data.value?.copy(load = true))
+        _data.value = _data.value?.copy(load = true)
         viewModelScope.launch {
             val result = repository.likeById(post)
             val posts = _data.value?.posts.orEmpty().map {
                 if (it.id == result.id) result else it
             }
-            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+            _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
         }
     }
 
     fun shareById(post: Post) {
-        _data.postValue(_data.value?.copy(load = true))
+        _data.value = _data.value?.copy(load = true)
         viewModelScope.launch {
             val result = repository.shareById(post)
             val posts = _data.value?.posts.orEmpty().map {
                 if (it.id == result.id) result else it
             }
-            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+            _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
         }
     }
 
 
     fun removeById(id: Long) {
-        _data.postValue(_data.value?.copy(load = true))
+        _data.value = _data.value?.copy(load = true)
         viewModelScope.launch {
             repository.removeById(id)
             val posts = _data.value?.posts.orEmpty().filter { it.id != id }
-            _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
+            _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
         }
     }
 
     fun changeContentAndSave(content: String) {
         edited.value?.let {
             if (it.content != content) {
-                _postCreated.postValue(NewPostModel(load = true))
+                _postCreated.value = NewPostModel(load = true)
                 viewModelScope.launch {
                     val result =
                         repository.save(it.copy(content = content, published = Date().time))
@@ -104,10 +104,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                         post.id != result.id
                     }.plus(result).sortedByDescending { post -> post.id }
                     _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
-                    _postCreated.postValue(NewPostModel(post = result))
+                    _postCreated.value = NewPostModel()
                     edited.postValue(empty)
                 }
-            }
+            } else _postCreated.value = NewPostModel()
         }
     }
 }
