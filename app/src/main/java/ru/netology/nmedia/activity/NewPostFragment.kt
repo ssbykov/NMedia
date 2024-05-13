@@ -46,7 +46,7 @@ class NewPostFragment : Fragment() {
             content.requestFocus()
             AndroidUtils.showKeyboard(content)
             ok.setOnClickListener {
-                viewModel.changeContentAndSave(binding.content.text.toString())
+//                viewModel.changeContentAndSave(binding.content.text.toString())
                 AndroidUtils.hideKeyboard(requireView())
             }
 

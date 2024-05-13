@@ -31,19 +31,22 @@ class PostFragment : Fragment() {
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
             val post = state?.posts?.find { it.id == postId }
-            if (post != null && !state.load) {
+            if (post != null) {
                 PostViewHolder(
                     binding.postCard,
                     PostSetupClickListeners(viewModel, this)
                 ).bind(post)
             }
 
-            binding.progressPost.isVisible = state.load
+
+        }
+
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+            binding.progressPost.isVisible = state.loading
             if (state.error) {
                 Toast.makeText(context, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
                 viewModel.errorReset()
             }
-
         }
         return binding.root
     }

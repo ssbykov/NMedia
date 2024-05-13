@@ -53,12 +53,16 @@ class FeedFragment : Fragment() {
                     currentSize = newSize
                 }
             }
-            binding.errorGroup.isVisible = state.error && state.posts.isEmpty() && !state.load
-            binding.progress.isVisible = state.load
-            binding.emptyTest.isVisible = state.posts.isEmpty() && !state.load
-            if (state.error && state.posts.isNotEmpty()) {
+            binding.emptyTest.isVisible = state.posts.isEmpty()
+        }
+
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+
+            binding.progress.isVisible = state.loading
+            binding.errorGroup.isVisible =
+                state.error && viewModel.data.value?.posts.isNullOrEmpty()
+            if (state.error && !viewModel.data.value?.posts.isNullOrEmpty()) {
                 Toast.makeText(context, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
-                viewModel.errorReset()
             }
         }
 
