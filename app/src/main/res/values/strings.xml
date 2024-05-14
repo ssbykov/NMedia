@@ -28,4 +28,6 @@
     <string name="retry">RETRY</string>
     <string name="base_url" translatable="false">"http://10.0.2.2:9999/api/slow/posts"</string>
     <string name="attachment_image">Attachment image</string>
+    <string name="error_loading">Error loading data</string>
+    <string name="retry_loading">Retry</string>
 </resources>

@@ -59,6 +59,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun loadPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
+            repository.synchronize()
             repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
@@ -85,6 +86,25 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _dataState.value = FeedModelState(error = true)
         }
     }
+    fun changeContentAndSave(content: String) {
+        edited.value?.let {
+            if (it.content != content) {
+                _postCreated.value = NewPostModel(load = true)
+                viewModelScope.launch {
+                    try {
+                        _dataState.value = FeedModelState(loading = true)
+                        repository.save(it.copy(content = content))
+                        _dataState.value = FeedModelState()
+                        _postCreated.value = NewPostModel()
+                        edited.value = empty
+                    } catch (e: Exception) {
+                        println(e)
+                        _dataState.value = FeedModelState(error = true)
+                    }
+                }
+            } else _postCreated.value = NewPostModel()
+        }
+    }
 //
 //    fun shareById(post: Post) = viewModelScope.launch {
 //        _data.value = _data.value?.copy(load = true)
@@ -98,21 +118,5 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 //
 
 //
-//    fun changeContentAndSave(content: String) {
-//        edited.value?.let {
-//            if (it.content != content) {
-//                _postCreated.value = NewPostModel(load = true)
-//                viewModelScope.launch {
-//                    val result =
-//                        repository.save(it.copy(content = content, published = Date().time))
-//                    val posts = _data.value?.posts.orEmpty().filter { post ->
-//                        post.id != result.id
-//                    }.plus(result).sortedByDescending { post -> post.id }
-//                    _data.postValue(FeedModel(posts = posts, empty = posts.isEmpty()))
-//                    _postCreated.value = NewPostModel()
-//                    edited.postValue(empty)
-//                }
-//            } else _postCreated.value = NewPostModel()
-//        }
-//    }
+
 }

@@ -9,6 +9,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.adapter.PostsSetupClickListeners
@@ -59,16 +60,14 @@ class FeedFragment : Fragment() {
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
 
             binding.progress.isVisible = state.loading
-            binding.errorGroup.isVisible =
-                state.error && viewModel.data.value?.posts.isNullOrEmpty()
-            if (state.error && !viewModel.data.value?.posts.isNullOrEmpty()) {
-                Toast.makeText(context, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
+            if (state.error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) {
+                        viewModel
+                        viewModel.loadPosts()
+                    }
+                    .show()
             }
-        }
-
-        binding.retry.setOnClickListener {
-            binding.errorGroup.isVisible = false
-            viewModel.loadPosts()
         }
 
         binding.swiper.setOnRefreshListener {

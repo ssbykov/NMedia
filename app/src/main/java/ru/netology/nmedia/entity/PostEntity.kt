@@ -17,8 +17,13 @@ data class PostEntity(
     val likedByMe: Boolean = false,
     val shares: Int = 0,
     val views: Int = 0,
-    val video: String? = null
+    val video: String? = null,
+    val state: StateType? = StateType.NEW
 )
+
+enum class StateType {
+    NEW, EDITED, DELETED
+}
 
 @Mapper
 interface PostMapper {
@@ -26,10 +31,10 @@ interface PostMapper {
     fun toDto(postEntity: PostEntity): Post
 }
 
-fun List<PostEntity>.toDto(): List<Post> = map(PostMapperImpl()::toDto)
-fun List<Post>.toEntity(): List<PostEntity> = map(PostMapperImpl()::fromDto)
+fun List<PostEntity>.toDto(): List<Post> = map(PostMapperImpl::toDto)
+fun List<Post>.toEntity(): List<PostEntity> = map(PostMapperImpl::fromDto)
 
-class PostMapperImpl : PostMapper {
+object PostMapperImpl : PostMapper {
     override fun fromDto(post: Post) = PostEntity(
         id = post.id,
         author = post.author,
@@ -40,7 +45,8 @@ class PostMapperImpl : PostMapper {
         likedByMe = post.likedByMe,
         shares = post.shares,
         views = post.views,
-        video = post.video
+        video = post.video,
+        state = null
     )
 
     override fun toDto(postEntity: PostEntity) = Post(

@@ -20,4 +20,6 @@
     <string name="something_went_wrong">Что-то пошло не так</string>
     <string name="retry">ПОВТОРИТЬ</string>
     <string name="attachment_image">Вложенное изображение</string>
+    <string name="error_loading">Не удалось загрузить данные</string>
+    <string name="retry_loading">Повторить</string>
 </resources>
