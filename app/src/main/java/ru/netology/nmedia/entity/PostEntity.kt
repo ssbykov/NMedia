@@ -31,7 +31,9 @@ interface PostMapper {
     fun toDto(postEntity: PostEntity): Post
 }
 
-fun List<PostEntity>.toDto(): List<Post> = map(PostMapperImpl::toDto)
+fun List<PostEntity>.toDto(): List<Post> =
+    filter { it.state != StateType.DELETED }.map(PostMapperImpl::toDto)
+
 fun List<Post>.toEntity(): List<PostEntity> = map(PostMapperImpl::fromDto)
 
 object PostMapperImpl : PostMapper {

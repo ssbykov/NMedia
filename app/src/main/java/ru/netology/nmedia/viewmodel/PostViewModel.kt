@@ -30,6 +30,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = PostRepositoryImpl(AppDb.getInstance(application).postDao())
     val data = repository.data.map(::FeedModel)
+    private var nextId = 0L
 
     private val _postCreated = SingleLiveEvent<NewPostModel>()
     val postCreated: LiveData<NewPostModel>
@@ -61,6 +62,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _dataState.value = FeedModelState(loading = true)
             repository.synchronize()
             repository.getAll()
+            nextId = repository.getLastId() + 1
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
@@ -86,6 +88,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             _dataState.value = FeedModelState(error = true)
         }
     }
+
     fun changeContentAndSave(content: String) {
         edited.value?.let {
             if (it.content != content) {
@@ -93,16 +96,21 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 viewModelScope.launch {
                     try {
                         _dataState.value = FeedModelState(loading = true)
-                        repository.save(it.copy(content = content))
+                        repository.save(
+                            it.copy(
+                                id = if (it.id == 0L) nextId++ else it.id,
+                                content = content
+                            )
+                        )
                         _dataState.value = FeedModelState()
                         _postCreated.value = NewPostModel()
                         edited.value = empty
                     } catch (e: Exception) {
-                        println(e)
                         _dataState.value = FeedModelState(error = true)
                     }
                 }
-            } else _postCreated.value = NewPostModel()
+            }
+            _postCreated.value = NewPostModel()
         }
     }
 //

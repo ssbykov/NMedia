@@ -1,9 +1,6 @@
 package ru.netology.nmedia.repository
 
 import androidx.lifecycle.map
-import kotlinx.coroutines.Delay
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
@@ -41,8 +38,11 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun removeById(id: Long) {
         val postEntity = dao.getById(id)
-        val result = dao.insert(postEntity.copy(state = StateType.DELETED))
-        delay(5000)
+        if (postEntity.state == StateType.NEW) {
+            dao.removeById(id)
+        } else {
+            dao.insert(postEntity.copy(state = StateType.DELETED))
+        }
         synchronize()
     }
 
@@ -75,12 +75,18 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override suspend fun save(post: Post) {
         val postEntity = dao.getById(post.id)
         if (postEntity != null && postEntity.state != StateType.NEW) {
-            val result = dao.insert(postEntity.copy(state = StateType.EDITED))
+            dao.insert(postEntity.copy(content = post.content, state = StateType.EDITED))
         } else {
-            val result = dao.insert(PostMapperImpl.fromDto(post).copy(state = StateType.NEW))
+            dao.insert(
+                PostMapperImpl.fromDto(post)
+                    .copy(state = StateType.NEW)
+            )
         }
-        delay(5000)
         synchronize()
+    }
+
+    override suspend fun getLastId(): Long {
+        return dao.getLastId()
     }
 
     suspend fun synchronize() {
@@ -118,7 +124,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                         dao.removeById(postEntity.id)
                     }
 
-                    null -> TODO()
+                    null -> return
                 }
             } catch (e: IOException) {
                 throw NetworkError
