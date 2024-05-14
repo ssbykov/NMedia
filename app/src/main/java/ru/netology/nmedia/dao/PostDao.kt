@@ -6,11 +6,15 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import ru.netology.nmedia.entity.PostEntity
+import ru.netology.nmedia.entity.StateType
 
 @Dao
 interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): LiveData<List<PostEntity>>
+
+    @Query("SELECT * FROM PostEntity ORDER BY id DESC")
+    suspend fun getAllsync(): List<PostEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)
@@ -48,5 +52,5 @@ interface PostDao {
     @Query(
         """SELECT MAX(id) FROM PostEntity;"""
     )
-    suspend fun getLastId(): Long
+    suspend fun getLastId(): Long?
 }

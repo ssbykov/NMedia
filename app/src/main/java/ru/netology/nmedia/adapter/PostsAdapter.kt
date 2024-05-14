@@ -71,7 +71,7 @@ class PostViewHolder(
 
             if (post.attachment != null) {
                 Glide.with(attachment)
-                    .load("$BASE_URL_IMAGES${post.attachment?.url}")
+                    .load("$BASE_URL_IMAGES${post.attachment.url}")
                     .placeholder(R.drawable.ic_loading_100dp)
                     .error(R.drawable.ic_error_100dp)
                     .timeout(30_000)

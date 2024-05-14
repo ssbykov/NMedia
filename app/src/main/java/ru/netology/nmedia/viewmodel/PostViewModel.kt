@@ -12,10 +12,8 @@ import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.NewPostModel
-import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
-import java.util.Date
 
 
 val empty = Post(
@@ -65,6 +63,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             nextId = repository.getLastId() + 1
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
+            println(e)
             _dataState.value = FeedModelState(error = true)
         }
     }
@@ -96,15 +95,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 viewModelScope.launch {
                     try {
                         _dataState.value = FeedModelState(loading = true)
+                        _dataState.value = FeedModelState()
+                        _postCreated.value = NewPostModel()
+                        edited.value = empty
                         repository.save(
                             it.copy(
                                 id = if (it.id == 0L) nextId++ else it.id,
                                 content = content
                             )
                         )
-                        _dataState.value = FeedModelState()
-                        _postCreated.value = NewPostModel()
-                        edited.value = empty
                     } catch (e: Exception) {
                         _dataState.value = FeedModelState(error = true)
                     }

@@ -43,7 +43,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         } else {
             dao.insert(postEntity.copy(state = StateType.DELETED))
         }
-        synchronize()
+        synchronize(dao.getAllsync())
     }
 
 
@@ -82,15 +82,15 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                     .copy(state = StateType.NEW)
             )
         }
-        synchronize()
+        synchronize(dao.getAllsync())
     }
 
     override suspend fun getLastId(): Long {
-        return dao.getLastId()
+        return dao.getLastId() ?: 0
     }
 
-    suspend fun synchronize() {
-        postEntites.value?.filter { it.state != null }?.forEach { postEntity ->
+    suspend fun synchronize(posts: List<PostEntity>? = postEntites.value) {
+        posts?.filter { it.state != null }?.forEach { postEntity ->
             try {
                 when (postEntity.state) {
                     StateType.NEW -> {
