@@ -58,7 +58,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     fun loadPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
-            repository.synchronize()
             repository.getAll()
             nextId = repository.getLastId() + 1
             _dataState.value = FeedModelState()
@@ -95,8 +94,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 viewModelScope.launch {
                     try {
                         _dataState.value = FeedModelState(loading = true)
-                        _dataState.value = FeedModelState()
-                        _postCreated.value = NewPostModel()
                         edited.value = empty
                         repository.save(
                             it.copy(
@@ -106,10 +103,12 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                         )
                     } catch (e: Exception) {
                         _dataState.value = FeedModelState(error = true)
+                    } finally {
+                        _dataState.value = FeedModelState()
+                        _postCreated.value = NewPostModel()
                     }
                 }
             }
-            _postCreated.value = NewPostModel()
         }
     }
 //

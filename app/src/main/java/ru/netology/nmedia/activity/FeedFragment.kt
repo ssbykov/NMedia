@@ -66,6 +66,7 @@ class FeedFragment : Fragment() {
                         viewModel
                         viewModel.loadPosts()
                     }
+                    .setAnchorView(binding.add)
                     .show()
             }
         }
