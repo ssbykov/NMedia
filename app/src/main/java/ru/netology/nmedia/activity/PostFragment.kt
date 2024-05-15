@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostSetupClickListeners
 import ru.netology.nmedia.adapter.PostViewHolder
@@ -31,19 +32,21 @@ class PostFragment : Fragment() {
 
         viewModel.data.observe(viewLifecycleOwner) { state ->
             val post = state?.posts?.find { it.id == postId }
-            if (post != null && !state.load) {
+            if (post != null) {
                 PostViewHolder(
                     binding.postCard,
                     PostSetupClickListeners(viewModel, this)
                 ).bind(post)
             }
+        }
 
-            binding.progressPost.isVisible = state.load
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+            binding.progressPost.isVisible = state.loading
             if (state.error) {
-                Toast.makeText(context, R.string.something_went_wrong, Toast.LENGTH_SHORT).show()
-                viewModel.errorReset()
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(R.string.retry_loading) { viewModel.loadPosts() }
+                    .show()
             }
-
         }
         return binding.root
     }

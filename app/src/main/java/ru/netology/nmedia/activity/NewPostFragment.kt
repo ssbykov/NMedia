@@ -62,7 +62,7 @@ class NewPostFragment : Fragment() {
                         ).show()
                     }
                 }
-                if (state?.post != null) {
+                if (!state.load) {
                     findNavController().navigateUp()
                 }
             }
