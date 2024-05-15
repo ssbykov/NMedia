@@ -153,14 +153,14 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     private suspend fun synchronizeLike(post: Post?, postEntity: PostEntity) {
         if (post != null && post.likedByMe != postEntity.likedByMe) {
             setLike(post)
-        }
-        dao.insert(
-            PostMapperImpl.fromDto(
-                requireNotNull(post).copy(
-                    likes = postEntity.likes,
-                    likedByMe = postEntity.likedByMe
+            dao.insert(
+                PostMapperImpl.fromDto(
+                    requireNotNull(post).copy(
+                        likes = postEntity.likes,
+                        likedByMe = postEntity.likedByMe
+                    )
                 )
             )
-        )
+        }
     }
 }
