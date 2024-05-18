@@ -57,6 +57,10 @@ class FeedFragment : Fragment() {
             binding.emptyTest.isVisible = state.posts.isEmpty()
         }
 
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            println("Новых сообщений: $it")
+        }
+
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
 
             binding.progress.isVisible = state.loading

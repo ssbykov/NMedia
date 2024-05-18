@@ -1,6 +1,15 @@
 package ru.netology.nmedia.repository
 
-import androidx.lifecycle.map
+import androidx.lifecycle.asLiveData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import okhttp3.Dispatcher
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
@@ -16,8 +25,10 @@ import ru.netology.nmedia.error.UnknownError
 
 class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
-    private val postEntites = dao.getAll()
-    override val data = postEntites.map(List<PostEntity>::toDto)
+    val postEntites = dao.getAll()
+    override val data = dao.getAll()
+        .map(List<PostEntity>::toDto)
+        .flowOn(Dispatchers.Default)
 
     override suspend fun getAll() {
         synchronize(dao.getAllsync())
@@ -69,6 +80,20 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         return dao.getLastId() ?: 0
     }
 
+    override fun getNewerCoutn(id: Long): Flow<Int> = flow {
+
+        while (true) {
+            delay(10_000L)
+            val response = PostApi.retrofitService.getNewer(id)
+            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+            val newPosts = response.body() ?: throw UnknownError
+            dao.insert(newPosts.toEntity().map { it.copy(state = null) })
+            emit(newPosts.size)
+        }
+    }
+        .catch { e -> println(e) } // исправить
+        .flowOn(Dispatchers.Default)
+
     private suspend fun setStateEditedOrNew(post: Post) {
         val postEntity = dao.getById(post.id)
         if (postEntity != null && postEntity.state != StateType.NEW) {
@@ -100,8 +125,9 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
-    private suspend fun synchronize(posts: List<PostEntity>? = postEntites.value) {
-        posts?.filter { it.state != null }?.forEach { postEntity ->
+    private suspend fun synchronize(posts: List<PostEntity>?) {
+        val postList =  posts?.filter { it.state != null }
+        postList?.forEach { postEntity ->
             try {
                 when (postEntity.state) {
                     StateType.NEW -> {
@@ -112,6 +138,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                             response.code(),
                             response.message()
                         )
+//                        println("Пост: $postEntity")
                         dao.removeById(postEntity.id)
                         dao.insert(PostMapperImpl.fromDto(requireNotNull(response.body())))
                         synchronizeLike(response.body(), postEntity)
