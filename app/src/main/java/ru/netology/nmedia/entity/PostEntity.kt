@@ -18,7 +18,8 @@ data class PostEntity(
     val shares: Int = 0,
     val views: Int = 0,
     val video: String? = null,
-    val state: StateType? = StateType.NEW
+    val state: StateType? = StateType.NEW,
+    val visible: Boolean = true
 )
 
 enum class StateType {
@@ -48,7 +49,8 @@ object PostMapperImpl : PostMapper {
         shares = post.shares,
         views = post.views,
         video = post.video,
-        state = null
+        state = null,
+        visible = true
     )
 
     override fun toDto(postEntity: PostEntity) = Post(

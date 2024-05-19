@@ -13,9 +13,15 @@ import ru.netology.nmedia.entity.StateType
 interface PostDao {
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     fun getAll(): Flow<List<PostEntity>>
+    @Query("SELECT * FROM PostEntity WHERE visible = 1 ORDER BY id DESC")
+    fun getAllVisible(): Flow<List<PostEntity>>
 
     @Query("SELECT * FROM PostEntity ORDER BY id DESC")
     suspend fun getAllsync(): List<PostEntity>
+    @Query("SELECT COUNT(*) FROM PostEntity WHERE visible = 0")
+    suspend fun getNewerCount(): Int
+    @Query("UPDATE PostEntity SET visible = 1")
+    suspend fun showAll()
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(post: PostEntity)

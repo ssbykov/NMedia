@@ -9,6 +9,7 @@ import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
@@ -37,16 +38,18 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 
-    val newerCount = postEntites.switchMap {
-
+//    private val _newerCount = SingleLiveEvent<Int>()
+    var newerCount = postEntites.switchMap {
         repository.getNewerCoutn(it.filter { postEntite ->
             postEntite.state != StateType.NEW
-        }.firstOrNull()?.id ?: 0 ).asLiveData(Dispatchers.Default)
+        }.firstOrNull()?.id ?: 0).asLiveData(Dispatchers.Default)
     }
+//        get() = _newerCount
 
     private val _postCreated = SingleLiveEvent<NewPostModel>()
     val postCreated: LiveData<NewPostModel>
         get() = _postCreated
+
     private val _dataState = SingleLiveEvent<FeedModelState>()
     val dataState: LiveData<FeedModelState>
         get() = _dataState
@@ -75,10 +78,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             repository.getAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
-            println(e)
             _dataState.value = FeedModelState(error = true)
         }
     }
+
+    fun showAll() = viewModelScope.launch { repository.showtAll() }
 
     fun removeById(id: Long) = viewModelScope.launch {
         try {

@@ -26,17 +26,21 @@ import ru.netology.nmedia.error.UnknownError
 class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     val postEntites = dao.getAll()
-    override val data = dao.getAll()
+    override val data = dao.getAllVisible()
         .map(List<PostEntity>::toDto)
         .flowOn(Dispatchers.Default)
 
     override suspend fun getAll() {
-        synchronize(dao.getAllsync())
+        val postEntites = dao.getAllsync()
+        synchronize(postEntites)
         try {
-            val response = PostApi.retrofitService.getAll()
+            val lastId = postEntites.filter { it.state != StateType.NEW }.firstOrNull()?.id ?: 0
+            val response = PostApi.retrofitService.getNewer(lastId)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val posts = response.body() ?: throw UnknownError
-            dao.insert(posts.toEntity().map { it.copy(state = null) })
+            dao.insert(
+                posts.filter { it.author != "Student" }.toEntity()
+                    .map { it.copy(state = null, visible = false) })
         } catch (e: IOException) {
             throw NetworkError
 
@@ -46,6 +50,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         } catch (e: Exception) {
             throw UnknownError
         }
+    }
+
+    override suspend fun showtAll() {
+        dao.showAll()
     }
 
     override suspend fun removeById(id: Long) {
@@ -87,8 +95,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             val response = PostApi.retrofitService.getNewer(id)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val newPosts = response.body() ?: throw UnknownError
-            dao.insert(newPosts.toEntity().map { it.copy(state = null) })
-            emit(newPosts.size)
+            dao.insert(
+                newPosts.filter { it.author != "Student" }.toEntity()
+                    .map { it.copy(state = null, visible = false) })
+            emit(dao.getNewerCount())
         }
     }
         .catch { e -> println(e) } // исправить
@@ -101,7 +111,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         } else {
             dao.insert(
                 PostMapperImpl.fromDto(post)
-                    .copy(state = StateType.NEW)
+                    .copy(state = StateType.NEW, visible = true)
             )
         }
     }
@@ -126,7 +136,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
     private suspend fun synchronize(posts: List<PostEntity>?) {
-        val postList =  posts?.filter { it.state != null }
+        val postList = posts?.filter { it.state != null && it.visible }
         postList?.forEach { postEntity ->
             try {
                 when (postEntity.state) {
@@ -138,7 +148,6 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                             response.code(),
                             response.message()
                         )
-//                        println("Пост: $postEntity")
                         dao.removeById(postEntity.id)
                         dao.insert(PostMapperImpl.fromDto(requireNotNull(response.body())))
                         synchronizeLike(response.body(), postEntity)
@@ -180,14 +189,14 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     private suspend fun synchronizeLike(post: Post?, postEntity: PostEntity) {
         if (post != null && post.likedByMe != postEntity.likedByMe) {
             setLike(post)
-            dao.insert(
-                PostMapperImpl.fromDto(
-                    requireNotNull(post).copy(
-                        likes = postEntity.likes,
-                        likedByMe = postEntity.likedByMe
-                    )
+        }
+        dao.insert(
+            PostMapperImpl.fromDto(
+                requireNotNull(post).copy(
+                    likes = postEntity.likes,
+                    likedByMe = postEntity.likedByMe
                 )
             )
-        }
+        )
     }
 }
