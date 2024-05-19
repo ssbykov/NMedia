@@ -20,6 +20,7 @@ import ru.netology.nmedia.entity.StateType
 import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
+import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 
@@ -101,7 +102,9 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             emit(dao.getNewerCount())
         }
     }
-        .catch { e -> println(e) } // исправить
+        .catch {
+            e -> throw AppError.from(e)
+        }
         .flowOn(Dispatchers.Default)
 
     private suspend fun setStateEditedOrNew(post: Post) {
