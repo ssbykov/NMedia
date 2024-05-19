@@ -38,7 +38,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 
-    var newerCount = postEntites.switchMap {
+    val newerCount = postEntites.switchMap {
         repository.getNewerCoutn(it.filter { postEntite ->
             postEntite.state != StateType.NEW
         }.firstOrNull()?.id ?: 0).asLiveData(Dispatchers.Default)
