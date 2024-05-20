@@ -35,13 +35,13 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         val postEntites = dao.getAllsync()
         synchronize(postEntites)
         try {
-            val lastId = postEntites.filter { it.state != StateType.NEW }.firstOrNull()?.id ?: 0
+            val lastId = postEntites.firstOrNull()?.id ?: 0
             val response = PostApi.retrofitService.getNewer(lastId)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val posts = response.body() ?: throw UnknownError
             dao.insert(
                 posts.filter { it.author != "Student" }.toEntity()
-                    .map { it.copy(state = null, visible = false) })
+                    .map { it.copy(state = null, visible = true) })
         } catch (e: IOException) {
             throw NetworkError
 
@@ -92,7 +92,6 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override fun getNewerCoutn(id: Long): Flow<Int> = flow {
 
         while (true) {
-            delay(10_000L)
             val response = PostApi.retrofitService.getNewer(id)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val newPosts = response.body() ?: throw UnknownError
@@ -100,6 +99,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                 newPosts.filter { it.author != "Student" }.toEntity()
                     .map { it.copy(state = null, visible = false) })
             emit(dao.getNewerCount())
+            delay(10_000L)
         }
     }
         .catch {

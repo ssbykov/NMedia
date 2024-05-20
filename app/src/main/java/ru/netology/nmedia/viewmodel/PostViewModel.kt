@@ -9,6 +9,7 @@ import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -39,9 +40,15 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 
     val newerCount = postEntites.switchMap {
-        repository.getNewerCoutn(it.filter { postEntite ->
-            postEntite.state != StateType.NEW
-        }.firstOrNull()?.id ?: 0).asLiveData(Dispatchers.Default)
+        repository.getNewerCoutn(
+            it.filter { postEntite ->
+                postEntite.state != StateType.NEW
+            }.firstOrNull()?.id ?: 0
+        )
+            .catch {
+                _dataState.postValue(FeedModelState(error = true))
+            }
+            .asLiveData(Dispatchers.Default)
     }
 
     private val _postCreated = SingleLiveEvent<NewPostModel>()

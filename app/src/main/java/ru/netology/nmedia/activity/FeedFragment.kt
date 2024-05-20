@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -74,6 +73,7 @@ class FeedFragment : Fragment() {
                     .setAction(R.string.retry_loading) {
                         viewModel
                         viewModel.loadPosts()
+                        viewModel.showAll()
                     }
                     .setAnchorView(binding.add)
                     .show()
@@ -82,7 +82,9 @@ class FeedFragment : Fragment() {
 
         binding.swiper.setOnRefreshListener {
             viewModel.loadPosts()
+            viewModel.showAll()
             binding.swiper.isRefreshing = false
+            binding.newPosts.visibility = View.GONE
         }
 
         binding.newPosts.setOnClickListener {
