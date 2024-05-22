@@ -113,25 +113,15 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
     override suspend fun saveWithAttachment(post: Post, upload: MediaUpload) {
-        try {
-            val media = upload(upload)
-            val postWithAttachment = post.copy(
-                attachment = Attachment(
-                    media.id,
-                    "attachment",
-                    AttachmentType.IMAGE
-                )
+        val media = upload(upload)
+        val postWithAttachment = post.copy(
+            attachment = Attachment(
+                media.id,
+                "attachment",
+                AttachmentType.IMAGE
             )
-            save(postWithAttachment)
-        } catch (e: IOException) {
-            throw NetworkError
-
-        } catch (e: ApiError) {
-            throw e
-
-        } catch (e: Exception) {
-            throw UnknownError
-        }
+        )
+        save(postWithAttachment)
     }
 
     override suspend fun getLastId(): Long {
