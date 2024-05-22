@@ -1,5 +1,7 @@
 package ru.netology.nmedia.repository
 
+import android.net.Uri
+import androidx.core.net.toFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -12,11 +14,10 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
-import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Media
-import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.entity.AttachmentEmbeddable
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostMapperImpl
 import ru.netology.nmedia.entity.StateType
@@ -26,6 +27,7 @@ import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
+import java.io.File
 
 class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
@@ -83,39 +85,9 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
 
-    override suspend fun save(post: Post, upload: MediaUpload?) {
-        if (upload != null) {
-            val media = upload(upload)
-            val postWithAttachment = post.copy(
-                attachment = Attachment(
-                    media.id,
-                    AttachmentType.IMAGE
-                )
-            )
-            setStateEditedOrNew(postWithAttachment)
-        } else setStateEditedOrNew(post)
+    override suspend fun save(post: Post) {
+        setStateEditedOrNew(post)
         synchronize(dao.getAllsync())
-    }
-
-    override suspend fun upload(upload: MediaUpload): Media {
-        try {
-            val media = MultipartBody.Part.createFormData(
-                "file", upload.file.name, upload.file.asRequestBody()
-            )
-            val response = PostApi.retrofitService.upload(media)
-            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
-
-            return response.body() ?: throw ApiError(response.code(), response.message())
-
-        } catch (e: IOException) {
-            throw NetworkError
-
-        } catch (e: ApiError) {
-            throw e
-
-        } catch (e: Exception) {
-            throw UnknownError
-        }
     }
 
     override suspend fun getLastId(): Long {
@@ -172,22 +144,54 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
+    private suspend fun upload(upload: File): Media {
+        try {
+            val media = MultipartBody.Part.createFormData(
+                "file", upload.name, upload.asRequestBody()
+            )
+            val response = PostApi.retrofitService.upload(media)
+            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+
+            return response.body() ?: throw ApiError(response.code(), response.message())
+        } catch (e: IOException) {
+            throw NetworkError
+
+        } catch (e: ApiError) {
+            throw e
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
     private suspend fun synchronize(posts: List<PostEntity>?) {
         val postList = posts?.filter { it.state != null && it.visible }
         postList?.forEach { postEntity ->
             try {
                 when (postEntity.state) {
                     StateType.NEW -> {
+                        val newPostEntity = if (postEntity.attachment != null) {
+                            val mediaUpload = Uri.parse(postEntity.attachment.url).toFile()
+                            val media = upload(mediaUpload)
+                            postEntity.copy(
+                                attachment = AttachmentEmbeddable(
+                                    media.id,
+                                    AttachmentType.IMAGE
+                                )
+                            )
+                        } else {
+                            postEntity
+                        }
                         val response = PostApi.retrofitService.save(
-                            PostMapperImpl.toDto(postEntity).copy(id = 0)
+                            PostMapperImpl.toDto(newPostEntity).copy(id = 0)
                         )
                         if (!response.isSuccessful) throw ApiError(
                             response.code(),
                             response.message()
                         )
-                        dao.removeById(postEntity.id)
+                        dao.removeById(newPostEntity.id)
                         dao.insert(PostMapperImpl.fromDto(requireNotNull(response.body())))
-                        synchronizeLike(response.body(), postEntity)
+                        synchronizeLike(response.body(), newPostEntity)
                     }
 
                     StateType.EDITED -> {

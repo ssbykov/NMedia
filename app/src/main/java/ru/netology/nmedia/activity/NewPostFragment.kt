@@ -10,7 +10,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toFile
 import androidx.core.view.MenuProvider
@@ -98,7 +97,7 @@ class NewPostFragment : Fragment() {
                     .createIntent(pickPhotoLauncher::launch)
             }
 
-            removePhoto.setOnClickListener{
+            removePhoto.setOnClickListener {
                 viewModel.dropPhoto()
             }
 
@@ -131,7 +130,10 @@ class NewPostFragment : Fragment() {
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                     return when (menuItem.itemId) {
                         R.id.save -> {
-                            viewModel.changeContentAndSave(binding.content.text.toString())
+                            viewModel.changeContentAndSave(
+                                binding.content.text.toString(),
+                                viewModel.photo.value?.uri
+                            )
                             AndroidUtils.hideKeyboard(requireView())
                             true
                         }

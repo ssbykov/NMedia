@@ -26,7 +26,7 @@ data class PostEntity(
 
 data class AttachmentEmbeddable(
     val url: String,
-    val type: AttachmentType,
+    val type: AttachmentType? = null,
 )
 
 enum class StateType {

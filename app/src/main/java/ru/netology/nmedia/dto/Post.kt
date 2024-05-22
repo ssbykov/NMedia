@@ -16,7 +16,7 @@ data class Post(
 
 data class Attachment(
     val url: String,
-    val type: AttachmentType,
+    val type: AttachmentType? = null,
 )
 
 enum class AttachmentType {

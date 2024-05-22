@@ -6,16 +6,14 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.map
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
-import ru.netology.nmedia.dto.MediaUpload
+import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.StateType
 import ru.netology.nmedia.model.FeedModel
@@ -25,7 +23,6 @@ import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
 import java.io.File
-import java.net.URI
 
 
 val empty = Post(
@@ -91,10 +88,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         edited.value = empty
     }
 
-    fun errorReset() {
-        _dataState.value = FeedModelState()
-    }
-
     fun loadPosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
@@ -127,23 +120,19 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun changeContentAndSave(content: String) {
+    fun changeContentAndSave(content: String, uri: Uri?) {
         edited.value?.let {
-            if (it.content != content) {
+            if (it.content != content || it.attachment?.url != uri.toString()) {
                 _postCreated.value = NewPostModel(load = true)
                 viewModelScope.launch {
                     try {
                         _dataState.value = FeedModelState(loading = true)
                         val newPost = it.copy(
                             id = if (it.id == 0L) repository.getLastId() + 1 else it.id,
-                            content = content
+                            content = content,
+                            attachment = Attachment(url = uri.toString())
                         )
-                        when (_photo.value) {
-                            noPhoto -> repository.save(newPost)
-                            else -> _photo.value?.file?.let { file ->
-                                repository.save(newPost, MediaUpload(file))
-                            }
-                        }
+                        repository.save(newPost)
                         edited.value = empty
                     } catch (e: Exception) {
                         _dataState.value = FeedModelState(error = true)
