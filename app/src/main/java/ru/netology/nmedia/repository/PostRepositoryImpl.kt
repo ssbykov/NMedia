@@ -1,15 +1,12 @@
 package ru.netology.nmedia.repository
 
-import androidx.lifecycle.asLiveData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import okhttp3.Dispatcher
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
@@ -117,7 +114,6 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         val postWithAttachment = post.copy(
             attachment = Attachment(
                 media.id,
-                "attachment",
                 AttachmentType.IMAGE
             )
         )
