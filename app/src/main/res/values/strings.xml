@@ -31,4 +31,6 @@
     <string name="error_loading">Error loading data</string>
     <string name="retry_loading">Retry</string>
     <string name="new_posts">New posts (%1$s)</string>
+    <string name="save">Save</string>
+    <string name="remove">REMOVE</string>
 </resources>

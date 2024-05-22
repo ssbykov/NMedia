@@ -1,6 +1,7 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -19,8 +20,11 @@ import ru.netology.nmedia.entity.StateType
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.NewPostModel
+import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
+import java.io.File
+import java.net.URI
 
 
 val empty = Post(
@@ -60,6 +64,19 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         get() = _dataState
 
     val edited = MutableLiveData(empty)
+
+    private val noPhoto = PhotoModel()
+    private val _photo = MutableLiveData(noPhoto)
+    val photo: LiveData<PhotoModel>
+        get() = _photo
+
+    fun changePhoto(uri: Uri?, file: File?) {
+        _photo.value = PhotoModel(uri, file)
+    }
+
+    fun dropPhoto() {
+        _photo.value = PhotoModel()
+    }
 
     init {
         loadPosts()
@@ -133,6 +150,8 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
+
 //
 //    fun shareById(post: Post) = viewModelScope.launch {
 //        _data.value = _data.value?.copy(load = true)

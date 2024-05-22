@@ -23,4 +23,6 @@
     <string name="error_loading">Не удалось загрузить данные</string>
     <string name="retry_loading">Повторить</string>
     <string name="new_posts">Новые записи (%1$s)</string>
+    <string name="save">Сохранить</string>
+    <string name="remove">УДАЛИТЬ</string>
 </resources>

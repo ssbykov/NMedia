@@ -1,15 +1,26 @@
 package ru.netology.nmedia.activity
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toFile
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.github.dhaval2404.imagepicker.constant.ImageProvider
+import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
@@ -30,6 +41,24 @@ class NewPostFragment : Fragment() {
     ): View {
         val binding = FragmentNewPostBinding.inflate(inflater, container, false)
 
+        val pickPhotoLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                when (it.resultCode) {
+                    ImagePicker.RESULT_ERROR -> {
+                        Snackbar.make(
+                            binding.root,
+                            ImagePicker.getError(it.data),
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    }
+
+                    Activity.RESULT_OK -> {
+                        val uri = it.data?.data
+                        viewModel.changePhoto(uri, uri?.toFile())
+                    }
+                }
+            }
+
         with(binding) {
             val draftPrefs =
                 root.context.getSharedPreferences("draft", android.content.Context.MODE_PRIVATE)
@@ -45,15 +74,37 @@ class NewPostFragment : Fragment() {
 
             content.requestFocus()
             AndroidUtils.showKeyboard(content)
-            ok.setOnClickListener {
-                viewModel.changeContentAndSave(binding.content.text.toString())
-                AndroidUtils.hideKeyboard(requireView())
+
+            pickPhoto.setOnClickListener {
+                ImagePicker.with(this@NewPostFragment)
+                    .crop()
+                    .compress(2048)
+                    .provider(ImageProvider.GALLERY)
+                    .galleryMimeTypes(
+                        arrayOf(
+                            "image/png",
+                            "image/jpeg",
+                        )
+                    )
+                    .createIntent(pickPhotoLauncher::launch)
+
+            }
+
+            takePhoto.setOnClickListener {
+                ImagePicker.with(this@NewPostFragment)
+                    .crop()
+                    .compress(2048)
+                    .provider(ImageProvider.CAMERA)
+                    .createIntent(pickPhotoLauncher::launch)
+            }
+
+            removePhoto.setOnClickListener{
+                viewModel.dropPhoto()
             }
 
             viewModel.postCreated.observe(viewLifecycleOwner) { state ->
                 if (state != null) {
                     binding.progressNew.isVisible = state.load
-                    binding.ok.isClickable = !state.load
                     if (state.error) {
                         Toast.makeText(
                             context,
@@ -66,6 +117,30 @@ class NewPostFragment : Fragment() {
                     findNavController().navigateUp()
                 }
             }
+
+            viewModel.photo.observe(viewLifecycleOwner) {
+                binding.photoContainer.isVisible = it.uri != null
+                binding.photo.setImageURI(it.uri)
+            }
+
+            requireActivity().addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_new_post, menu)
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.save -> {
+                            viewModel.changeContentAndSave(binding.content.text.toString())
+                            AndroidUtils.hideKeyboard(requireView())
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+
+            }, viewLifecycleOwner)
 
             val callback = object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
