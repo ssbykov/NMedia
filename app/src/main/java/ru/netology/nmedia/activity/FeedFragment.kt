@@ -4,11 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -57,6 +57,14 @@ class FeedFragment : Fragment() {
             binding.emptyTest.isVisible = state.posts.isEmpty()
         }
 
+        viewModel.newerCount.observe(viewLifecycleOwner) {
+            if (it != null && it > 0) {
+                binding.newPosts.text = getString(R.string.new_posts, it.toString())
+                binding.newPosts.visibility = View.VISIBLE
+            }
+
+        }
+
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
 
             binding.progress.isVisible = state.loading
@@ -65,6 +73,7 @@ class FeedFragment : Fragment() {
                     .setAction(R.string.retry_loading) {
                         viewModel
                         viewModel.loadPosts()
+                        viewModel.showAll()
                     }
                     .setAnchorView(binding.add)
                     .show()
@@ -73,8 +82,23 @@ class FeedFragment : Fragment() {
 
         binding.swiper.setOnRefreshListener {
             viewModel.loadPosts()
+            viewModel.showAll()
             binding.swiper.isRefreshing = false
+            binding.newPosts.visibility = View.GONE
         }
+
+        binding.newPosts.setOnClickListener {
+            viewModel.showAll()
+            binding.newPosts.visibility = View.GONE
+        }
+
+        adapter.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver() {
+            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
+                if (positionStart == 0) {
+                    binding.list.smoothScrollToPosition(0)
+                }
+            }
+        })
 
         binding.add.setOnClickListener {
             currentSize = adapter.currentList.size

@@ -22,4 +22,5 @@
     <string name="attachment_image">Вложенное изображение</string>
     <string name="error_loading">Не удалось загрузить данные</string>
     <string name="retry_loading">Повторить</string>
+    <string name="new_posts">Новые записи (%1$s)</string>
 </resources>

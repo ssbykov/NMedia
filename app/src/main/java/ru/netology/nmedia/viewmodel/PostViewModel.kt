@@ -4,11 +4,18 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.entity.StateType
 import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.NewPostModel
@@ -28,11 +35,26 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = PostRepositoryImpl(AppDb.getInstance(application).postDao())
     val data = repository.data.map(::FeedModel)
-    private var nextId = 0L
+        .asLiveData(Dispatchers.Default)
+
+    private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
+
+    val newerCount = postEntites.switchMap {
+        repository.getNewerCoutn(
+            it.filter { postEntite ->
+                postEntite.state != StateType.NEW
+            }.firstOrNull()?.id ?: 0
+        )
+            .catch {
+                _dataState.postValue(FeedModelState(error = true))
+            }
+            .asLiveData(Dispatchers.Default)
+    }
 
     private val _postCreated = SingleLiveEvent<NewPostModel>()
     val postCreated: LiveData<NewPostModel>
         get() = _postCreated
+
     private val _dataState = SingleLiveEvent<FeedModelState>()
     val dataState: LiveData<FeedModelState>
         get() = _dataState
@@ -59,13 +81,13 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         try {
             _dataState.value = FeedModelState(loading = true)
             repository.getAll()
-            nextId = repository.getLastId() + 1
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
-            println(e)
             _dataState.value = FeedModelState(error = true)
         }
     }
+
+    fun showAll() = viewModelScope.launch { repository.showtAll() }
 
     fun removeById(id: Long) = viewModelScope.launch {
         try {
@@ -94,13 +116,13 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 viewModelScope.launch {
                     try {
                         _dataState.value = FeedModelState(loading = true)
-                        edited.value = empty
                         repository.save(
                             it.copy(
-                                id = if (it.id == 0L) nextId++ else it.id,
+                                id = if (it.id == 0L) repository.getLastId() + 1 else it.id,
                                 content = content
                             )
                         )
+                        edited.value = empty
                     } catch (e: Exception) {
                         _dataState.value = FeedModelState(error = true)
                     } finally {
