@@ -144,12 +144,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                                 repository.saveWithAttachment(newPost, MediaUpload(file))
                             }
                         }
-                        repository.save(
-                            it.copy(
-                                id = if (it.id == 0L) repository.getLastId() + 1 else it.id,
-                                content = content
-                            )
-                        )
                         edited.value = empty
                     } catch (e: Exception) {
                         _dataState.value = FeedModelState(error = true)
