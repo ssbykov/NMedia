@@ -15,6 +15,8 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
@@ -111,7 +113,25 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
     override suspend fun saveWithAttachment(post: Post, upload: MediaUpload) {
-        TODO("Not yet implemented")
+        try {
+            val media = upload(upload)
+            val postWithAttachment = post.copy(
+                attachment = Attachment(
+                    media.id,
+                    "attachment",
+                    AttachmentType.IMAGE
+                )
+            )
+            save(postWithAttachment)
+        } catch (e: IOException) {
+            throw NetworkError
+
+        } catch (e: ApiError) {
+            throw e
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
     }
 
     override suspend fun getLastId(): Long {
