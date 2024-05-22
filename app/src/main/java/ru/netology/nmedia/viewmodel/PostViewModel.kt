@@ -120,9 +120,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun changeContentAndSave(content: String, uri: Uri?) {
+    fun changeContentAndSave(content: String, attachment: Attachment?) {
         edited.value?.let {
-            if (it.content != content || it.attachment?.url != uri.toString()) {
+            if (it.content != content || it.attachment?.url != attachment?.url.toString()) {
                 _postCreated.value = NewPostModel(load = true)
                 viewModelScope.launch {
                     try {
@@ -130,7 +130,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                         val newPost = it.copy(
                             id = if (it.id == 0L) repository.getLastId() + 1 else it.id,
                             content = content,
-                            attachment = Attachment(url = uri.toString())
+                            attachment = attachment
                         )
                         repository.save(newPost)
                         edited.value = empty

@@ -23,6 +23,8 @@ import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
+import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.viewmodel.PostViewModel
 
@@ -130,9 +132,12 @@ class NewPostFragment : Fragment() {
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                     return when (menuItem.itemId) {
                         R.id.save -> {
+                            val attachment = if(viewModel.photo.value != PhotoModel()) {
+                                Attachment(viewModel.photo.value?.uri.toString())
+                            } else null
                             viewModel.changeContentAndSave(
                                 binding.content.text.toString(),
-                                viewModel.photo.value?.uri
+                                attachment
                             )
                             AndroidUtils.hideKeyboard(requireView())
                             true
