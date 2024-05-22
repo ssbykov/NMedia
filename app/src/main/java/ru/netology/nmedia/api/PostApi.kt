@@ -52,7 +52,7 @@ interface PostApiService {
     suspend fun save(@Body post: Post): Response<Post>
 
     @Multipart
-    @POST("posts")
+    @POST("media")
     suspend fun upload(@Part media: MultipartBody.Part): Response<Media>
 
     @POST("posts/{id}/likes")
