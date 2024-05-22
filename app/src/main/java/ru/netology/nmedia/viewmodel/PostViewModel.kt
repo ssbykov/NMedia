@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.dto.MediaUpload
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.StateType
 import ru.netology.nmedia.model.FeedModel
@@ -133,6 +134,16 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                 viewModelScope.launch {
                     try {
                         _dataState.value = FeedModelState(loading = true)
+                        val newPost = it.copy(
+                            id = if (it.id == 0L) repository.getLastId() + 1 else it.id,
+                            content = content
+                        )
+                        when (_photo.value) {
+                            noPhoto -> repository.save(newPost)
+                            else -> _photo.value?.file?.let { file ->
+                                repository.saveWithAttachment(newPost, MediaUpload(file))
+                            }
+                        }
                         repository.save(
                             it.copy(
                                 id = if (it.id == 0L) repository.getLastId() + 1 else it.id,
