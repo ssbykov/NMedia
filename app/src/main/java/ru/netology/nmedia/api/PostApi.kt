@@ -53,7 +53,7 @@ interface PostApiService {
 
     @Multipart
     @POST("posts")
-    suspend fun upload(@Part media: MultipartBody): Response<Media>
+    suspend fun upload(@Part media: MultipartBody.Part): Response<Media>
 
     @POST("posts/{id}/likes")
     suspend fun likeById(@Path("id") id: Long): Response<Post>
