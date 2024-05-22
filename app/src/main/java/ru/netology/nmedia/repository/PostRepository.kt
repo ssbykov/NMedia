@@ -13,9 +13,8 @@ interface PostRepository {
     suspend fun likeById(post: Post)
     suspend fun shareById(post: Post)
     suspend fun removeById(id: Long)
-    suspend fun save(post: Post)
+    suspend fun save(post: Post, upload: MediaUpload? = null)
     suspend fun upload(upload: MediaUpload): Media
-    suspend fun saveWithAttachment(post: Post, upload: MediaUpload)
     suspend fun getLastId(): Long
     fun getNewerCoutn(id: Long): Flow<Int>
 }

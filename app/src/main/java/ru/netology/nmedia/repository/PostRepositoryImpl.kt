@@ -83,8 +83,17 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
 
-    override suspend fun save(post: Post) {
-        setStateEditedOrNew(post)
+    override suspend fun save(post: Post, upload: MediaUpload?) {
+        if (upload != null) {
+            val media = upload(upload)
+            val postWithAttachment = post.copy(
+                attachment = Attachment(
+                    media.id,
+                    AttachmentType.IMAGE
+                )
+            )
+            setStateEditedOrNew(postWithAttachment)
+        } else setStateEditedOrNew(post)
         synchronize(dao.getAllsync())
     }
 
@@ -107,17 +116,6 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         } catch (e: Exception) {
             throw UnknownError
         }
-    }
-
-    override suspend fun saveWithAttachment(post: Post, upload: MediaUpload) {
-        val media = upload(upload)
-        val postWithAttachment = post.copy(
-            attachment = Attachment(
-                media.id,
-                AttachmentType.IMAGE
-            )
-        )
-        save(postWithAttachment)
     }
 
     override suspend fun getLastId(): Long {

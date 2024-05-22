@@ -141,7 +141,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                         when (_photo.value) {
                             noPhoto -> repository.save(newPost)
                             else -> _photo.value?.file?.let { file ->
-                                repository.saveWithAttachment(newPost, MediaUpload(file))
+                                repository.save(newPost, MediaUpload(file))
                             }
                         }
                         edited.value = empty
