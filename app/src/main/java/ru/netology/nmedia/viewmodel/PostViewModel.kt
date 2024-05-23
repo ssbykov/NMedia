@@ -70,7 +70,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     val photo: LiveData<PhotoModel>
         get() = _photo
 
-    fun changePhoto(uri: Uri?, file: File?) {
+    fun changePhoto(uri: Uri?, file: File? = null) {
         _photo.value = PhotoModel(uri, file)
     }
 

@@ -1,6 +1,7 @@
 package ru.netology.nmedia.activity
 
 import android.app.Activity
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,9 +19,15 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
+import ru.netology.nmedia.Constants
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.activity.FeedFragment.Companion.urlArg
@@ -29,9 +36,12 @@ import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.viewmodel.PostViewModel
+import java.io.File
 
 class NewPostFragment : Fragment() {
 
+    private val KEY_CONTENT = "newPost"
+    private val KEY_ATTACHMENT = "newAttachment"
 
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
@@ -65,17 +75,25 @@ class NewPostFragment : Fragment() {
         with(binding) {
             val draftPrefs =
                 root.context.getSharedPreferences("draft", android.content.Context.MODE_PRIVATE)
-            val key = "newPost"
 
-            if (arguments != null) {
+            if (arguments?.textArg != null) {
                 content.setText(arguments?.textArg)
-                if (arguments?.urlArg != null) {
-                    photo.setImageURI(Uri.parse(arguments?.urlArg))
-                }
             } else {
-                val draft = draftPrefs.getString(key, "").toString()
+                val draft = draftPrefs.getString(KEY_CONTENT, "").toString()
                 content.setText(draft)
-                draftPrefs.edit().putString(key, "").apply()
+                draftPrefs.edit().putString(KEY_CONTENT, "").apply()
+            }
+
+            if (arguments?.urlArg != null) {
+                Glide.with(binding.photo)
+                    .load("${Constants.BASE_URL_IMAGES}${arguments?.urlArg}")
+                    .into(binding.photo)
+                val uri = Uri.parse(arguments?.urlArg)
+                viewModel.changePhoto(uri)
+            } else {
+                val uri = Uri.parse(draftPrefs.getString(KEY_CONTENT, "").toString())
+                if (uri.toString() != "")  viewModel.changePhoto(uri, uri.toFile())
+                draftPrefs.edit().putString(KEY_ATTACHMENT, "").apply()
             }
 
             content.requestFocus()
@@ -126,7 +144,9 @@ class NewPostFragment : Fragment() {
 
             viewModel.photo.observe(viewLifecycleOwner) {
                 binding.photoContainer.isVisible = it.uri != null
-                binding.photo.setImageURI(it.uri)
+                if (it.file != null) {
+                    binding.photo.setImageURI(it.uri)
+                }
             }
 
             requireActivity().addMenuProvider(object : MenuProvider {
@@ -137,13 +157,14 @@ class NewPostFragment : Fragment() {
                 override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                     return when (menuItem.itemId) {
                         R.id.save -> {
-                            val attachment = if(viewModel.photo.value != PhotoModel()) {
+                            val attachment = if (viewModel.photo.value != PhotoModel()) {
                                 Attachment(viewModel.photo.value?.uri.toString())
                             } else null
                             viewModel.changeContentAndSave(
                                 binding.content.text.toString(),
                                 attachment
                             )
+                            viewModel.dropPhoto()
                             AndroidUtils.hideKeyboard(requireView())
                             true
                         }
@@ -158,8 +179,10 @@ class NewPostFragment : Fragment() {
                 override fun handleOnBackPressed() {
                     if (arguments != null) {
                         viewModel.clear()
+                        viewModel.dropPhoto()
                     } else {
-                        draftPrefs.edit().putString(key, content.text.toString()).apply()
+                        draftPrefs.edit().putString(KEY_CONTENT, content.text.toString()).apply()
+                        draftPrefs.edit().putString(KEY_ATTACHMENT, viewModel.photo.toString()).apply()
                     }
                     findNavController().navigateUp()
                 }

@@ -87,7 +87,6 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
 
     override suspend fun save(post: Post) {
-//        val newPostWithAttachment = synchronizeAttachment(newPost, oldPost)
         setStateEditedOrNew(post)
         synchronize(dao.getAllsync())
     }
