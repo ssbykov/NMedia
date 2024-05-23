@@ -7,6 +7,6 @@ object Constants {
     const val BASE_URL_AVATAR = "$BASE_URL/avatars/"
     const val BASE_URL_POST = "$BASE_URL/api/slow/posts"
     const val BASE_URL_SLOW = "$BASE_URL/api/slow/"
-    const val BASE_URL_IMAGES = "$BASE_URL/images/"
+    const val BASE_URL_IMAGES = "$BASE_URL/media/"
     const val SDRF = "dd MMMM в H:mm"
 }
