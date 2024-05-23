@@ -91,8 +91,8 @@ class NewPostFragment : Fragment() {
                 val uri = Uri.parse(arguments?.urlArg)
                 viewModel.changePhoto(uri)
             } else {
-                val uri = Uri.parse(draftPrefs.getString(KEY_CONTENT, "").toString())
-                if (uri.toString() != "")  viewModel.changePhoto(uri, uri.toFile())
+                val uri = Uri.parse(draftPrefs.getString(KEY_ATTACHMENT, "").toString())
+                if (uri.toString() != "null" && uri.toString() != "")  viewModel.changePhoto(uri, uri.toFile())
                 draftPrefs.edit().putString(KEY_ATTACHMENT, "").apply()
             }
 
@@ -164,7 +164,7 @@ class NewPostFragment : Fragment() {
                                 binding.content.text.toString(),
                                 attachment
                             )
-                            viewModel.dropPhoto()
+//                            viewModel.dropPhoto()
                             AndroidUtils.hideKeyboard(requireView())
                             true
                         }
@@ -182,7 +182,8 @@ class NewPostFragment : Fragment() {
                         viewModel.dropPhoto()
                     } else {
                         draftPrefs.edit().putString(KEY_CONTENT, content.text.toString()).apply()
-                        draftPrefs.edit().putString(KEY_ATTACHMENT, viewModel.photo.toString()).apply()
+                        val uri = viewModel.photo.value?.uri.toString()
+                        draftPrefs.edit().putString(KEY_ATTACHMENT, uri).apply()
                     }
                     findNavController().navigateUp()
                 }
