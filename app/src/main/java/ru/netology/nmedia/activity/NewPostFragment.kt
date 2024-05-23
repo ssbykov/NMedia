@@ -1,6 +1,7 @@
 package ru.netology.nmedia.activity
 
 import android.app.Activity
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -22,6 +23,7 @@ import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
+import ru.netology.nmedia.activity.FeedFragment.Companion.urlArg
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.model.PhotoModel
@@ -67,6 +69,9 @@ class NewPostFragment : Fragment() {
 
             if (arguments != null) {
                 content.setText(arguments?.textArg)
+                if (arguments?.urlArg != null) {
+                    photo.setImageURI(Uri.parse(arguments?.urlArg))
+                }
             } else {
                 val draft = draftPrefs.getString(key, "").toString()
                 content.setText(draft)

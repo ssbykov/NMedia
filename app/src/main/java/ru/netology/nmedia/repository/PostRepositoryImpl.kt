@@ -14,6 +14,7 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
@@ -86,6 +87,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
 
     override suspend fun save(post: Post) {
+//        val newPostWithAttachment = synchronizeAttachment(newPost, oldPost)
         setStateEditedOrNew(post)
         synchronize(dao.getAllsync())
     }
@@ -116,7 +118,11 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     private suspend fun setStateEditedOrNew(post: Post) {
         val postEntity = dao.getById(post.id)
         if (postEntity != null && postEntity.state != StateType.NEW) {
-            dao.insert(postEntity.copy(content = post.content, state = StateType.EDITED))
+            dao.insert(postEntity.copy(
+                content = post.content,
+                state = StateType.EDITED,
+                attachment = PostMapperImpl.fromDtoAttachment(post.attachment)
+            ))
         } else {
             dao.insert(
                 PostMapperImpl.fromDto(post)
@@ -144,7 +150,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
-    private suspend fun upload(upload: File): Media {
+    override suspend fun upload(upload: File): Media {
         try {
             val media = MultipartBody.Part.createFormData(
                 "file", upload.name, upload.asRequestBody()
@@ -170,28 +176,16 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             try {
                 when (postEntity.state) {
                     StateType.NEW -> {
-                        val newPostEntity = if (postEntity.attachment != null) {
-                            val mediaUpload = Uri.parse(postEntity.attachment.url).toFile()
-                            val media = upload(mediaUpload)
-                            postEntity.copy(
-                                attachment = AttachmentEmbeddable(
-                                    media.id,
-                                    AttachmentType.IMAGE
-                                )
-                            )
-                        } else {
-                            postEntity
-                        }
                         val response = PostApi.retrofitService.save(
-                            PostMapperImpl.toDto(newPostEntity).copy(id = 0)
+                            PostMapperImpl.toDto(postEntity).copy(id = 0)
                         )
                         if (!response.isSuccessful) throw ApiError(
                             response.code(),
                             response.message()
                         )
-                        dao.removeById(newPostEntity.id)
+                        dao.removeById(postEntity.id)
                         dao.insert(PostMapperImpl.fromDto(requireNotNull(response.body())))
-                        synchronizeLike(response.body(), newPostEntity)
+                        synchronizeLike(response.body(), postEntity)
                     }
 
                     StateType.EDITED -> {

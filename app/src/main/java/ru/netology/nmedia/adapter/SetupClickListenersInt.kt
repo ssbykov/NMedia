@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
+import ru.netology.nmedia.activity.FeedFragment.Companion.urlArg
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
@@ -55,6 +56,9 @@ open class SetupClickListeners(
             R.id.newPostFragment,
             Bundle().apply {
                 textArg = post.content
+                if (post.attachment != null) {
+                    urlArg = post.attachment.url
+                }
             }
         )
     }

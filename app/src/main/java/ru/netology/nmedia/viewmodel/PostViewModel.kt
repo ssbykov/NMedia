@@ -2,6 +2,7 @@ package ru.netology.nmedia.viewmodel
 
 import android.app.Application
 import android.net.Uri
+import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.StateType
 import ru.netology.nmedia.model.FeedModel
@@ -122,24 +124,38 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     fun changeContentAndSave(content: String, attachment: Attachment?) {
         edited.value?.let {
-            if (it.content != content || it.attachment?.url != attachment?.url.toString()) {
-                _postCreated.value = NewPostModel(load = true)
-                viewModelScope.launch {
-                    try {
+            _postCreated.value = NewPostModel(load = true)
+            viewModelScope.launch {
+                try {
+                    val newPost = if (it.content != content) {
                         _dataState.value = FeedModelState(loading = true)
-                        val newPost = it.copy(
-                            id = if (it.id == 0L) repository.getLastId() + 1 else it.id,
-                            content = content,
-                            attachment = attachment
+                        it.copy(content = content)
+                    } else it
+
+                    val newAttachment =
+                        if (it.attachment?.url != attachment?.url.toString() && attachment != null) {
+                            val mediaUpload = Uri.parse(attachment.url).toFile()
+                            val media = repository.upload(mediaUpload)
+                            Attachment(media.id, AttachmentType.IMAGE)
+                        } else if (attachment == null) {
+                            null
+                        } else it.attachment
+
+                    if (it != newPost || it.attachment != newAttachment) {
+                        _dataState.value = FeedModelState(loading = true)
+                        repository.save(
+                            newPost.copy(
+                                id = if (it.id == 0L) repository.getLastId() + 1 else it.id,
+                                attachment = newAttachment
+                            )
                         )
-                        repository.save(newPost)
                         edited.value = empty
-                    } catch (e: Exception) {
-                        _dataState.value = FeedModelState(error = true)
-                    } finally {
-                        _dataState.value = FeedModelState()
-                        _postCreated.value = NewPostModel()
                     }
+                } catch (e: Exception) {
+                    _dataState.value = FeedModelState(error = true)
+                } finally {
+                    _dataState.value = FeedModelState()
+                    _postCreated.value = NewPostModel()
                 }
             }
         }

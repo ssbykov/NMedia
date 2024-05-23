@@ -28,6 +28,7 @@ class FeedFragment : Fragment() {
 
     companion object {
         var Bundle.textArg: String? by StringArg
+        var Bundle.urlArg: String? by StringArg
     }
 
     override fun onCreateView(

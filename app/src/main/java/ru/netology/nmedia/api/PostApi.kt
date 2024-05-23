@@ -28,7 +28,7 @@ private val retrofit = Retrofit.Builder()
             .run {
                 if (BuildConfig.DEBUG) {
                     addInterceptor(HttpLoggingInterceptor().apply {
-                        level = HttpLoggingInterceptor.Level.BODY
+                        level = HttpLoggingInterceptor.Level.HEADERS
                     })
                 } else this
             }
