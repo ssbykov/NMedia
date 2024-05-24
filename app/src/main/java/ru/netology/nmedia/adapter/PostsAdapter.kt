@@ -100,6 +100,10 @@ class PostViewHolder(
             content.setOnClickListener {
                 setupClickListeners.onPostListener(post)
             }
+
+            attachment.setOnClickListener {
+                setupClickListeners.onImageListener(post.attachment?.url)
+            }
             // инициализация меню
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {

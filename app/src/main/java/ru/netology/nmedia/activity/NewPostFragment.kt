@@ -1,23 +1,47 @@
 package ru.netology.nmedia.activity
 
+import android.app.Activity
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toFile
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.github.dhaval2404.imagepicker.constant.ImageProvider
+import com.google.android.material.snackbar.Snackbar
+import ru.netology.nmedia.Constants
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
+import ru.netology.nmedia.activity.FeedFragment.Companion.urlArg
 import ru.netology.nmedia.databinding.FragmentNewPostBinding
+import ru.netology.nmedia.dto.Attachment
+import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.viewmodel.PostViewModel
+import java.io.File
 
 class NewPostFragment : Fragment() {
 
+    private val KEY_CONTENT = "newPost"
+    private val KEY_ATTACHMENT = "newAttachment"
 
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
@@ -30,30 +54,81 @@ class NewPostFragment : Fragment() {
     ): View {
         val binding = FragmentNewPostBinding.inflate(inflater, container, false)
 
+        val pickPhotoLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                when (it.resultCode) {
+                    ImagePicker.RESULT_ERROR -> {
+                        Snackbar.make(
+                            binding.root,
+                            ImagePicker.getError(it.data),
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    }
+
+                    Activity.RESULT_OK -> {
+                        val uri = it.data?.data
+                        viewModel.changePhoto(uri, uri?.toFile())
+                    }
+                }
+            }
+
         with(binding) {
             val draftPrefs =
                 root.context.getSharedPreferences("draft", android.content.Context.MODE_PRIVATE)
-            val key = "newPost"
 
-            if (arguments != null) {
+            if (arguments?.textArg != null) {
                 content.setText(arguments?.textArg)
             } else {
-                val draft = draftPrefs.getString(key, "").toString()
+                val draft = draftPrefs.getString(KEY_CONTENT, "").toString()
                 content.setText(draft)
-                draftPrefs.edit().putString(key, "").apply()
+                draftPrefs.edit().putString(KEY_CONTENT, "").apply()
+            }
+
+            if (arguments?.urlArg != null) {
+                Glide.with(binding.photo)
+                    .load("${Constants.BASE_URL_IMAGES}${arguments?.urlArg}")
+                    .into(binding.photo)
+                val uri = Uri.parse(arguments?.urlArg)
+                viewModel.changePhoto(uri)
+            } else {
+                val uri = Uri.parse(draftPrefs.getString(KEY_ATTACHMENT, "").toString())
+                if (uri.toString() != "null" && uri.toString() != "")  viewModel.changePhoto(uri, uri.toFile())
+                draftPrefs.edit().putString(KEY_ATTACHMENT, "").apply()
             }
 
             content.requestFocus()
             AndroidUtils.showKeyboard(content)
-            ok.setOnClickListener {
-                viewModel.changeContentAndSave(binding.content.text.toString())
-                AndroidUtils.hideKeyboard(requireView())
+
+            pickPhoto.setOnClickListener {
+                ImagePicker.with(this@NewPostFragment)
+                    .crop()
+                    .compress(2048)
+                    .provider(ImageProvider.GALLERY)
+                    .galleryMimeTypes(
+                        arrayOf(
+                            "image/png",
+                            "image/jpeg",
+                        )
+                    )
+                    .createIntent(pickPhotoLauncher::launch)
+
+            }
+
+            takePhoto.setOnClickListener {
+                ImagePicker.with(this@NewPostFragment)
+                    .crop()
+                    .compress(2048)
+                    .provider(ImageProvider.CAMERA)
+                    .createIntent(pickPhotoLauncher::launch)
+            }
+
+            removePhoto.setOnClickListener {
+                viewModel.dropPhoto()
             }
 
             viewModel.postCreated.observe(viewLifecycleOwner) { state ->
                 if (state != null) {
                     binding.progressNew.isVisible = state.load
-                    binding.ok.isClickable = !state.load
                     if (state.error) {
                         Toast.makeText(
                             context,
@@ -67,12 +142,48 @@ class NewPostFragment : Fragment() {
                 }
             }
 
+            viewModel.photo.observe(viewLifecycleOwner) {
+                binding.photoContainer.isVisible = it.uri != null
+                if (it.file != null) {
+                    binding.photo.setImageURI(it.uri)
+                }
+            }
+
+            requireActivity().addMenuProvider(object : MenuProvider {
+                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                    menuInflater.inflate(R.menu.menu_new_post, menu)
+                }
+
+                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                    return when (menuItem.itemId) {
+                        R.id.save -> {
+                            val attachment = if (viewModel.photo.value != PhotoModel()) {
+                                Attachment(viewModel.photo.value?.uri.toString())
+                            } else null
+                            viewModel.changeContentAndSave(
+                                binding.content.text.toString(),
+                                attachment
+                            )
+//                            viewModel.dropPhoto()
+                            AndroidUtils.hideKeyboard(requireView())
+                            true
+                        }
+
+                        else -> false
+                    }
+                }
+
+            }, viewLifecycleOwner)
+
             val callback = object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     if (arguments != null) {
                         viewModel.clear()
+                        viewModel.dropPhoto()
                     } else {
-                        draftPrefs.edit().putString(key, content.text.toString()).apply()
+                        draftPrefs.edit().putString(KEY_CONTENT, content.text.toString()).apply()
+                        val uri = viewModel.photo.value?.uri.toString()
+                        draftPrefs.edit().putString(KEY_ATTACHMENT, uri).apply()
                     }
                     findNavController().navigateUp()
                 }

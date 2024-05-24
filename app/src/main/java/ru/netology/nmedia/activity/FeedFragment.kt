@@ -8,7 +8,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -28,6 +27,7 @@ class FeedFragment : Fragment() {
 
     companion object {
         var Bundle.textArg: String? by StringArg
+        var Bundle.urlArg: String? by StringArg
     }
 
     override fun onCreateView(
@@ -92,16 +92,10 @@ class FeedFragment : Fragment() {
             binding.newPosts.visibility = View.GONE
         }
 
-        adapter.registerAdapterDataObserver(object: RecyclerView.AdapterDataObserver() {
-            override fun onItemRangeInserted(positionStart: Int, itemCount: Int) {
-                if (positionStart == 0) {
-                    binding.list.smoothScrollToPosition(0)
-                }
-            }
-        })
 
         binding.add.setOnClickListener {
             currentSize = adapter.currentList.size
+            viewModel.dropPhoto()
             findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
         }
 
