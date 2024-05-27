@@ -30,6 +30,6 @@ data class AttachmentEmbeddable(
 )
 
 enum class StateType {
-    NEW, EDITED, DELETED, LIKE
+    NEW, EDITED, DELETED
 }
 

@@ -35,7 +35,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override suspend fun getAll() {
         val postEntites = dao.getAllsync()
         val localSynchronizedPosts = postEntites.filter { it.state != StateType.NEW }
-        synchronize(postEntites)
+        SynchronizePosts.synchronize(postEntites, dao)
         try {
             val response =
                 PostApi.retrofitService.getNewer(localSynchronizedPosts.firstOrNull()?.id ?: 0)
@@ -97,17 +97,22 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         } else {
             postEntity?.copy(state = StateType.DELETED)?.let { dao.insert(it) }
         }
-        synchronize(dao.getAllsync())
+        SynchronizePosts.synchronize(dao.getAllsync(), dao)
+//        synchronize(dao.getAllsync())
     }
 
 
     override suspend fun likeById(post: Post) {
         val postEntity = dao.getById(post.id)
-        if ((postEntity?.state == null)) {
-            postEntity?.copy(state = StateType.LIKE)?.let { dao.insert(it) }
-        } else return
-        dao.likeById(post.id)
-        synchronize(dao.getAllsync())
+        if (postEntity?.state == null) {
+            try {
+                dao.likeById(post.id)
+                SynchronizePosts.setLike(post)
+            } catch (e: Exception) {
+                dao.likeById(post.id)
+            }
+        }
+
     }
 
     override suspend fun shareById(post: Post) {
@@ -117,7 +122,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun save(post: Post) {
         setStateEditedOrNew(post)
-        synchronize(dao.getAllsync())
+        SynchronizePosts.synchronize(dao.getAllsync(), dao)
     }
 
     override suspend fun getLastId(): Long {
@@ -138,26 +143,6 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
-    private suspend fun setLike(post: Post): Post? {
-        try {
-            val response = if (post.likedByMe) {
-                PostApi.retrofitService.unlikeById(post.id)
-            } else {
-                PostApi.retrofitService.likeById(post.id)
-            }
-            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
-            return response.body()
-        } catch (e: IOException) {
-            throw NetworkError
-
-        } catch (e: ApiError) {
-            throw e
-
-        } catch (e: Exception) {
-            throw UnknownError
-        }
-    }
-
     override suspend fun upload(upload: File): Media? {
         try {
             val media = MultipartBody.Part.createFormData(
@@ -175,76 +160,6 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
         } catch (e: Exception) {
             throw UnknownError
-        }
-    }
-
-    private suspend fun synchronize(posts: List<PostEntity>?) {
-        val postList = posts?.filter { it.state != null && it.visible }
-        postList?.forEach { postEntity ->
-            try {
-                val newPost = when (postEntity.state) {
-                    StateType.NEW -> {
-                        val response = PostApi.retrofitService.save(
-                            PostMapperImpl.toDto(postEntity).copy(id = 0)
-                        )
-                        if (!response.isSuccessful) throw ApiError(
-                            response.code(),
-                            response.message()
-                        )
-                        val post = response.body()
-                        dao.removeById(postEntity.id)
-                        dao.insert(PostMapperImpl.fromDto(requireNotNull(post)))
-                        if (postEntity.likedByMe) {
-                            setLike(post)
-                        } else post
-                    }
-
-                    StateType.EDITED -> {
-                        val response =
-                            PostApi.retrofitService.save(PostMapperImpl.toDto(postEntity))
-                        if (!response.isSuccessful) throw ApiError(
-                            response.code(),
-                            response.message()
-                        )
-                        if (response.body() != null && response.body()?.likedByMe != postEntity.likedByMe) {
-                            setLike(requireNotNull(response.body()))
-                        } else response.body()
-                    }
-
-                    StateType.DELETED -> {
-                        val response = PostApi.retrofitService.removeById(postEntity.id)
-                        if (!response.isSuccessful) throw ApiError(
-                            response.code(),
-                            response.message()
-                        )
-                        dao.removeById(postEntity.id)
-                        null
-                    }
-
-                    StateType.LIKE -> {
-                        setLike(
-                            PostMapperImpl.toDto(
-                                postEntity.copy(
-                                    likedByMe = !postEntity.likedByMe,
-                                )
-                            )
-                        )
-                    }
-
-                    null -> null
-                }
-                if (newPost != null) {
-                    dao.insert(PostMapperImpl.fromDto(newPost))
-                }
-            } catch (e: IOException) {
-                throw NetworkError
-
-            } catch (e: ApiError) {
-                throw e
-
-            } catch (e: Exception) {
-                throw UnknownError
-            }
         }
     }
 
