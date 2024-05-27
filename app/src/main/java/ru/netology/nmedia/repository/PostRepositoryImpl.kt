@@ -1,7 +1,5 @@
 package ru.netology.nmedia.repository
 
-import android.net.Uri
-import androidx.core.net.toFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -14,11 +12,8 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
-import ru.netology.nmedia.dto.Attachment
-import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
-import ru.netology.nmedia.entity.AttachmentEmbeddable
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostMapperImpl
 import ru.netology.nmedia.entity.StateType
@@ -108,11 +103,9 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun likeById(post: Post) {
         val postEntity = dao.getById(post.id)
-        if (postEntity?.state == StateType.LIKE) {
-            dao.insert(postEntity.copy(state = null))
-        } else if ((postEntity?.state == null)) {
+        if ((postEntity?.state == null)) {
             postEntity?.copy(state = StateType.LIKE)?.let { dao.insert(it) }
-        }
+        } else return
         dao.likeById(post.id)
         synchronize(dao.getAllsync())
     }
@@ -200,9 +193,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                         )
                         val post = response.body()
                         dao.removeById(postEntity.id)
-                        println("Пост удален: ${postEntity.content}")
                         dao.insert(PostMapperImpl.fromDto(requireNotNull(post)))
-                        println("Пост добавлен: ${post.content} - ${post.id}")
                         if (postEntity.likedByMe) {
                             setLike(post)
                         } else post
@@ -231,13 +222,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                     }
 
                     StateType.LIKE -> {
-                        val likedByMe = !postEntity.likedByMe
-                        val likes = postEntity.likes + (if (likedByMe) -1 else 1)
                         setLike(
                             PostMapperImpl.toDto(
                                 postEntity.copy(
-                                    likedByMe = likedByMe,
-                                    likes = likes
+                                    likedByMe = !postEntity.likedByMe,
                                 )
                             )
                         )
