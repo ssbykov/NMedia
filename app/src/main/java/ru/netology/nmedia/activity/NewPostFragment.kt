@@ -164,7 +164,6 @@ class NewPostFragment : Fragment() {
                                 binding.content.text.toString(),
                                 attachment
                             )
-//                            viewModel.dropPhoto()
                             AndroidUtils.hideKeyboard(requireView())
                             true
                         }

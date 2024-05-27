@@ -1,6 +1,7 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
+import android.icu.util.Calendar
 import android.net.Uri
 import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
@@ -31,7 +32,7 @@ val empty = Post(
     id = 0,
     author = "Автор",
     content = "",
-    published = 0,
+    published = System.currentTimeMillis() / 1000,
     likedByMe = false
 )
 
