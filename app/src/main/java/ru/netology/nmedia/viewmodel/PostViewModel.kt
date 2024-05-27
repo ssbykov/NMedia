@@ -44,10 +44,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 
     val newerCount = postEntites.switchMap {
+        val lastId = it.filter { postEntite -> postEntite.state != StateType.NEW }.firstOrNull()
         repository.getNewerCoutn(
-            it.filter { postEntite ->
-                postEntite.state != StateType.NEW
-            }.firstOrNull()?.id ?: 0
+            lastId?.id ?: 0
         )
             .catch {
                 _dataState.postValue(FeedModelState(error = true))
@@ -136,7 +135,10 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                         if (it.attachment?.url != attachment?.url.toString() && attachment != null) {
                             val mediaUpload = Uri.parse(attachment.url).toFile()
                             val media = repository.upload(mediaUpload)
-                            Attachment(media.id, AttachmentType.IMAGE)
+                            if (media != null) Attachment(
+                                media.id,
+                                AttachmentType.IMAGE
+                            ) else it.attachment
                         } else if (attachment == null) {
                             null
                         } else it.attachment
@@ -149,11 +151,11 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
                                 attachment = newAttachment
                             )
                         )
-                        edited.value = empty
                     }
                 } catch (e: Exception) {
                     _dataState.value = FeedModelState(error = true)
                 } finally {
+                    edited.value = empty
                     _dataState.value = FeedModelState()
                     _postCreated.value = NewPostModel()
                 }
