@@ -40,12 +40,15 @@ import java.io.File
 
 class NewPostFragment : Fragment() {
 
-    private val KEY_CONTENT = "newPost"
-    private val KEY_ATTACHMENT = "newAttachment"
 
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
     )
+
+    companion object {
+        private const val KEY_CONTENT = "newPost"
+        private const val KEY_ATTACHMENT = "newAttachment"
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -92,7 +95,10 @@ class NewPostFragment : Fragment() {
                 viewModel.changePhoto(uri)
             } else {
                 val uri = Uri.parse(draftPrefs.getString(KEY_ATTACHMENT, "").toString())
-                if (uri.toString() != "null" && uri.toString() != "")  viewModel.changePhoto(uri, uri.toFile())
+                if (uri.toString() != "null" && uri.toString() != "") viewModel.changePhoto(
+                    uri,
+                    uri.toFile()
+                )
                 draftPrefs.edit().putString(KEY_ATTACHMENT, "").apply()
             }
 
