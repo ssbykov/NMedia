@@ -46,8 +46,8 @@ class NewPostFragment : Fragment() {
     )
 
     companion object {
-        private const val KEY_CONTENT = "newPost"
-        private const val KEY_ATTACHMENT = "newAttachment"
+        private const val KEY_CONTENT = "KEY_CONTENT"
+        private const val KEY_ATTACHMENT = "KEY_ATTACHMENT"
     }
 
     override fun onCreateView(
