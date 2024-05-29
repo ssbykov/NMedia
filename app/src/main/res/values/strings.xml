@@ -34,4 +34,7 @@
     <string name="save">Save</string>
     <string name="remove">REMOVE</string>
     <string name="description_photo">Description photo</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="logout">Logout</string>
 </resources>

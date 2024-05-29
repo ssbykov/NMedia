@@ -8,7 +8,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostsAdapter
@@ -73,7 +72,6 @@ class FeedFragment : Fragment() {
                     .setAction(R.string.retry_loading) {
                         viewModel
                         viewModel.loadPosts()
-                        viewModel.showAll()
                     }
                     .setAnchorView(binding.add)
                     .show()
@@ -83,7 +81,6 @@ class FeedFragment : Fragment() {
         binding.swiper.setOnRefreshListener {
             currentSize = adapter.currentList.size
             viewModel.loadPosts()
-            viewModel.showAll()
             binding.swiper.isRefreshing = false
             binding.newPosts.visibility = View.GONE
         }

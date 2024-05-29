@@ -29,6 +29,7 @@ object PostMapperImpl : PostMapper {
     override fun fromDto(post: Post) = PostEntity(
         id = post.id,
         author = post.author,
+        authorId = post.authorId,
         authorAvatar = post.authorAvatar,
         content = post.content,
         published = post.published,
@@ -45,6 +46,7 @@ object PostMapperImpl : PostMapper {
     override fun toDto(postEntity: PostEntity) = Post(
         postEntity.id,
         postEntity.author,
+        postEntity.authorId,
         postEntity.authorAvatar,
         postEntity.content,
         postEntity.published,

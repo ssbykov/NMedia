@@ -11,9 +11,12 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
@@ -31,6 +34,7 @@ import java.io.File
 val empty = Post(
     id = 0,
     author = "Автор",
+    authorId = 0,
     content = "",
     published = System.currentTimeMillis() / 1000,
     likedByMe = false
@@ -39,8 +43,13 @@ val empty = Post(
 class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = PostRepositoryImpl(AppDb.getInstance(application).postDao())
-    val data = repository.data.map(::FeedModel)
-        .asLiveData(Dispatchers.Default)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val data = AppAuth.getInstance().authStateFlow.flatMapLatest { auth ->
+        repository.data.map { posts ->
+            FeedModel(posts.map { it.copy(ownedByMy = it.authorId == auth?.id) })
+        }
+
+    }.asLiveData(Dispatchers.Default)
 
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 
@@ -94,6 +103,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         try {
             _dataState.value = FeedModelState(loading = true)
             repository.getAll()
+            repository.showtAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)

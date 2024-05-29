@@ -26,4 +26,7 @@
     <string name="save">Сохранить</string>
     <string name="remove">УДАЛИТЬ</string>
     <string name="description_photo">Описание изображения</string>
+    <string name="sign_in">Войти</string>
+    <string name="sign_up">Регистрация</string>
+    <string name="logout">Выйти</string>
 </resources>
