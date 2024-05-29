@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
-import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
@@ -21,7 +20,6 @@ import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.ActivityAppBinding
 import ru.netology.nmedia.viewmodel.AuthViewModel
-import javax.inject.Singleton
 
 class AppActivity : AppCompatActivity() {
 
@@ -62,67 +60,38 @@ class AppActivity : AppCompatActivity() {
 
         val viewModel by viewModels<AuthViewModel>()
 
-//        addMenuProvider(object : MenuProvider {
-//            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-//                menuInflater.inflate(R.menu.auth_menu, menu)
-//            }
-//
-//            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-//                return when (menuItem.itemId) {
-//                    R.id.sign_in,
-//                    R.id.sign_up -> {
-//                        AppAuth.getInstance().setAuth(5, "x-token")
-//                        true
-//                    }
-//
-//                    R.id.logout -> {
-//                        AppAuth.getInstance().clearAuth()
-//                        true
-//                    }
-//
-//                    else -> false
-//                }
-//            }
-//
-//            override fun onPrepareMenu(menu: Menu) {
-//                super.onPrepareMenu(menu)
-//                menu.setGroupVisible(R.id.authenticated, viewModel.isAuthenticated)
-//                menu.setGroupVisible(R.id.unauthenticated, !viewModel.isAuthenticated)
-//            }
-//        })
+        addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.auth_menu, menu)
+            }
 
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.sign_in,
+                    R.id.sign_up -> {
+                        AppAuth.getInstance().setAuth(5, "x-token")
+                        true
+                    }
 
-        var currentMenuProvider: MenuProvider? = null
-        viewModel.auth.observe(this) {
-            val isAuthenticated = viewModel.isAuthenticated
-            currentMenuProvider?.let { removeMenuProvider(it) }
+                    R.id.logout -> {
+                        AppAuth.getInstance().clearAuth()
+                        true
+                    }
 
-            addMenuProvider(object : MenuProvider {
-                override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-                    menuInflater.inflate(R.menu.auth_menu, menu)
+                    else -> false
+                }
+            }
+
+            override fun onPrepareMenu(menu: Menu) {
+                super.onPrepareMenu(menu)
+                viewModel.auth.observe(this@AppActivity) {
+                    val isAuthenticated = it != null
                     menu.setGroupVisible(R.id.authenticated, isAuthenticated)
                     menu.setGroupVisible(R.id.unauthenticated, !isAuthenticated)
                 }
+            }
+        })
 
-                override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
-                    return when (menuItem.itemId) {
-                        R.id.sign_in,
-                        R.id.sign_up -> {
-                            AppAuth.getInstance().setAuth(5, "x-token")
-                            true
-                        }
-
-                        R.id.logout -> {
-                            AppAuth.getInstance().clearAuth()
-                            true
-                        }
-
-                        else -> false
-                    }
-                }
-
-            }.also { currentMenuProvider = it })
-        }
     }
 
     private fun requestNotificationsPermission() {

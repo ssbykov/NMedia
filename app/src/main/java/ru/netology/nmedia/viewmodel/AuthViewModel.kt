@@ -9,11 +9,4 @@ class AuthViewModel : ViewModel() {
         .authStateFlow
         .asLiveData()
 
-    val isAuthenticated: Boolean
-//        get() = auth.value?.token != null
-        get() {
-            println("authStateFlow: isAuthenticated - ${auth.value?.token}")
-            return auth.value?.token != null
-        }
-
 }
