@@ -81,24 +81,22 @@ class NewPostFragment : Fragment() {
 
             if (arguments?.textArg != null) {
                 content.setText(arguments?.textArg)
+                if (arguments?.urlArg != null) {
+                    Glide.with(binding.photo)
+                        .load("${Constants.BASE_URL_IMAGES}${arguments?.urlArg}")
+                        .into(binding.photo)
+                    val uri = Uri.parse(arguments?.urlArg)
+                    viewModel.changePhoto(uri)
+                } else viewModel.dropPhoto()
             } else {
                 val draft = draftPrefs.getString(KEY_CONTENT, "").toString()
                 content.setText(draft)
-                draftPrefs.edit().putString(KEY_CONTENT, "").apply()
-            }
-
-            if (arguments?.urlArg != null) {
-                Glide.with(binding.photo)
-                    .load("${Constants.BASE_URL_IMAGES}${arguments?.urlArg}")
-                    .into(binding.photo)
-                val uri = Uri.parse(arguments?.urlArg)
-                viewModel.changePhoto(uri)
-            } else {
                 val uri = Uri.parse(draftPrefs.getString(KEY_ATTACHMENT, "").toString())
                 if (uri.toString() != "null" && uri.toString() != "") viewModel.changePhoto(
                     uri,
                     uri.toFile()
                 )
+                draftPrefs.edit().putString(KEY_CONTENT, "").apply()
                 draftPrefs.edit().putString(KEY_ATTACHMENT, "").apply()
             }
 
@@ -186,7 +184,8 @@ class NewPostFragment : Fragment() {
                         viewModel.clear()
                         viewModel.dropPhoto()
                     } else {
-                        draftPrefs.edit().putString(KEY_CONTENT, content.text.toString()).apply()
+                        draftPrefs.edit().putString(KEY_CONTENT, content.text.toString())
+                            .apply()
                         val uri = viewModel.photo.value?.uri.toString()
                         draftPrefs.edit().putString(KEY_ATTACHMENT, uri).apply()
                     }

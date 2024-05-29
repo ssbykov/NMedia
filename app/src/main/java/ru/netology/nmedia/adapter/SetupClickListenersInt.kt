@@ -58,9 +58,7 @@ open class SetupClickListeners(
             R.id.newPostFragment,
             Bundle().apply {
                 textArg = post.content
-                if (post.attachment != null) {
-                    urlArg = post.attachment.url
-                }
+                urlArg = post.attachment?.url
             }
         )
     }
