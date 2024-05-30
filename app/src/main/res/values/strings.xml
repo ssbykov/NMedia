@@ -44,4 +44,6 @@
     <string name="login_button">LOGIN</string>
     <string name="name">Name</string>
     <string name="send">SEND</string>
+    <string name="required">Required</string>
+    <string name="psw_not_match">"Passwords don't match"</string>
 </resources>

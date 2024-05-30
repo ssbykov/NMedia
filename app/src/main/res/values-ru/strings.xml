@@ -36,4 +36,6 @@
     <string name="name">Имя</string>
     <string name="password2">Пароль 2</string>
     <string name="send">ОТПРАВИТЬ</string>
+    <string name="required">Обязательное</string>
+    <string name="psw_not_match">Пароли не совпадают</string>
 </resources>

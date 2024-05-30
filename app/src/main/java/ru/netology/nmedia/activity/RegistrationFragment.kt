@@ -12,6 +12,7 @@ import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentLoginBinding
 import ru.netology.nmedia.databinding.FragmentRegistrationBinding
+import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.viewmodel.LoginViewModel
 import ru.netology.nmedia.viewmodel.RegistrationViewModel
 
@@ -30,23 +31,40 @@ class RegistrationFragment : Fragment() {
 
         with(binding) {
             registrationButton.setOnClickListener {
+                val login = loginRegistrationEditText.text.toString()
+                val name = nameRegistrationEditText.text.toString()
                 val password = passwordRegistrationEditText.text.toString()
                 val confirmPassword = passwordRegistrationEditText2.text.toString()
+
+                if (name.isNullOrEmpty()) {
+                    nameRegistrationLayout.error = getString(R.string.required)
+                    return@setOnClickListener
+                } else nameRegistrationLayout.error = null
+
+                if (login.isNullOrEmpty()) {
+                    loginRegistrationLayout.error = getString(R.string.required)
+                    return@setOnClickListener
+                } else loginRegistrationLayout.error = null
+
+                if (password.isNullOrEmpty()) {
+                    passwordRegistrationLayout.error = getString(R.string.required)
+                    return@setOnClickListener
+                } else passwordRegistrationLayout.error = null
+
                 if (password != confirmPassword ) {
                     passwordRegistrationLayout2.error = "Пароли не совпадают"
                     return@setOnClickListener
                 } else passwordRegistrationLayout2.error = null
+
                 viewModel.registration(
-                    login = loginRegistrationEditText.text.toString(),
+                    login = login,
                     password = password,
-                    name = nameRegistrationEditText.text.toString()
+                    name = name
                 )
+                AndroidUtils.hideKeyboard(requireView())
             }
         }
 
-        fun checkPasswordMatch(password: String, confirmPassword: String): Boolean {
-            return password == confirmPassword
-        }
 
         viewModel.loginState.observe(viewLifecycleOwner) { state ->
             binding.progressRegistration.isVisible = state.logining
