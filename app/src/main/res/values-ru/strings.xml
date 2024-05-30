@@ -29,4 +29,7 @@
     <string name="sign_in">Войти</string>
     <string name="sign_up">Регистрация</string>
     <string name="logout">Выйти</string>
+    <string name="password">Пароль</string>
+    <string name="login">Логин</string>
+    <string name="login_button">ВОЙТИ</string>
 </resources>

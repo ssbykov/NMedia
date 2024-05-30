@@ -12,7 +12,9 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import ru.netology.nmedia.R
@@ -23,11 +25,12 @@ import ru.netology.nmedia.viewmodel.AuthViewModel
 
 class AppActivity : AppCompatActivity() {
 
+    private lateinit var navHostFragment: NavHostFragment
+    private lateinit var navController: NavController
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
+
         intent?.let {
             if (it.action != Intent.ACTION_SEND) {
                 return@let
@@ -58,7 +61,12 @@ class AppActivity : AppCompatActivity() {
 
         checkGoogleApiAvailability()
 
-        val viewModel by viewModels<AuthViewModel>()
+        val viewModelAuth by viewModels<AuthViewModel>()
+
+        navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
 
         addMenuProvider(object : MenuProvider {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -67,7 +75,11 @@ class AppActivity : AppCompatActivity() {
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 return when (menuItem.itemId) {
-                    R.id.sign_in,
+                    R.id.sign_in -> {
+                        navController.navigate(R.id.loginFragment)
+                        true
+                    }
+
                     R.id.sign_up -> {
                         AppAuth.getInstance().setAuth(5, "x-token")
                         true
@@ -84,7 +96,7 @@ class AppActivity : AppCompatActivity() {
 
             override fun onPrepareMenu(menu: Menu) {
                 super.onPrepareMenu(menu)
-                viewModel.auth.observe(this@AppActivity) {
+                viewModelAuth.auth.observe(this@AppActivity) {
                     val isAuthenticated = it != null
                     menu.setGroupVisible(R.id.authenticated, isAuthenticated)
                     menu.setGroupVisible(R.id.unauthenticated, !isAuthenticated)
