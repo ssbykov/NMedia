@@ -2,11 +2,16 @@ package ru.netology.nmedia.activity
 
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
@@ -39,6 +44,43 @@ class FeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentFeedBinding.inflate(inflater, container, false)
+
+
+        requireActivity().addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.auth_menu, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                return when (menuItem.itemId) {
+                    R.id.sign_in -> {
+                        findNavController().navigate(R.id.loginFragment)
+                        true
+                    }
+
+                    R.id.sign_up -> {
+                        AppAuth.getInstance().setAuth(5, "x-token")
+                        true
+                    }
+
+                    R.id.logout -> {
+                        AppAuth.getInstance().clearAuth()
+                        true
+                    }
+
+                    else -> false
+                }
+            }
+
+            override fun onPrepareMenu(menu: Menu) {
+                super.onPrepareMenu(menu)
+                viewModel.isLogin.observe(viewLifecycleOwner) {
+                    val isAuthenticated = it != null
+                    menu.setGroupVisible(R.id.authenticated, isAuthenticated)
+                    menu.setGroupVisible(R.id.unauthenticated, !isAuthenticated)
+                }
+            }
+        }, viewLifecycleOwner)
 
         return binding.root
     }
@@ -97,9 +139,7 @@ class FeedFragment : Fragment() {
         binding.add.setOnClickListener {
             viewModel.isLogin.observe(viewLifecycleOwner) { state ->
                 if (!state) {
-                    findNavController().navigate(
-                        R.id.action_feedFragment_to_loginFragment,
-                        Bundle().apply { nextPageArg = R.id.newPostFragment })
+                    findNavController().navigate(R.id.action_feedFragment_to_loginFragment)
                 } else {
                     currentSize = adapter.currentList.size
                     viewModel.dropPhoto()

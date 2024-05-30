@@ -50,7 +50,7 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         }
     }.asLiveData(Dispatchers.Default)
 
-    val isLogin = AppAuth.getInstance().authSharedFlow.map { it != null }.asLiveData()
+    val isLogin = AppAuth.getInstance().authStateFlow.map { it != null }.asLiveData()
 
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 

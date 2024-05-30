@@ -44,9 +44,7 @@ class LoginFragment : Fragment() {
 
         viewModel.isLogin.observe(viewLifecycleOwner) {state->
             if (state) {
-                if(arguments != null) {
-                    findNavController().navigate(requireNotNull(arguments?.nextPageArg))
-                } else findNavController().navigateUp()
+                findNavController().navigate(R.id.feedFragment)
             }
         }
         return binding.root

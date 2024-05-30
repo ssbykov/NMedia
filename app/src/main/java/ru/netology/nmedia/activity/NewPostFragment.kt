@@ -183,7 +183,7 @@ class NewPostFragment : Fragment() {
                         val uri = viewModel.photo.value?.uri.toString()
                         draftPrefs.edit().putString(KEY_ATTACHMENT, uri).apply()
                     }
-                    findNavController().navigate(R.id.feedFragment)
+                    findNavController().navigateUp()
                 }
             }
             requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
