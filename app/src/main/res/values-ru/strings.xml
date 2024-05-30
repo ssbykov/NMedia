@@ -33,4 +33,6 @@
     <string name="login">Логин</string>
     <string name="login_button">ВОЙТИ</string>
     <string name="error_login">Не удалось войти в приложение</string>
+    <string name="name">Имя</string>
+    <string name="password2">Пароль 2</string>
 </resources>

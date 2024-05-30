@@ -56,7 +56,7 @@ class FeedFragment : Fragment() {
                     }
 
                     R.id.sign_up -> {
-                        AppAuth.getInstance().setAuth(5, "x-token")
+                        findNavController().navigate(R.id.registrationFragment)
                         true
                     }
 
@@ -72,9 +72,8 @@ class FeedFragment : Fragment() {
             override fun onPrepareMenu(menu: Menu) {
                 super.onPrepareMenu(menu)
                 viewModel.isLogin.observe(viewLifecycleOwner) {
-                    val isAuthenticated = it != null
-                    menu.setGroupVisible(R.id.authenticated, isAuthenticated)
-                    menu.setGroupVisible(R.id.unauthenticated, !isAuthenticated)
+                    menu.setGroupVisible(R.id.authenticated, it)
+                    menu.setGroupVisible(R.id.unauthenticated, !it)
                 }
             }
         }, viewLifecycleOwner)

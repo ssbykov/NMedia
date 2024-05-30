@@ -3,10 +3,8 @@ package ru.netology.nmedia.api
 import okhttp3.Interceptor.Chain
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.Response as response
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -72,7 +70,18 @@ interface PostApiService {
 
     @FormUrlEncoded
     @POST("users/authentication")
-    suspend fun login(@Field("login") login: String, @Field("pass") pass: String): Response<Token>
+    suspend fun authentication(
+        @Field("login") login: String,
+        @Field("pass") pass: String
+    ): Response<Token>
+
+    @FormUrlEncoded
+    @POST("users/registration")
+    suspend fun registration(
+        @Field("login") login: String,
+        @Field("pass") pass: String,
+        @Field("name") name: String,
+    ): Response<Token>
 
     @Multipart
     @POST("media")

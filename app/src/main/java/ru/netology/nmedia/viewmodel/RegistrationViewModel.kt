@@ -3,6 +3,7 @@ package ru.netology.nmedia.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,7 @@ import ru.netology.nmedia.model.LoginState
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
 
-class LoginViewModel(application: Application) : AndroidViewModel(application) {
+class RegistrationViewModel (application: Application) : AndroidViewModel(application) {
 
     private val repository = PostRepositoryImpl(AppDb.getInstance(application).postDao())
 
@@ -25,10 +26,10 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val isLogin =
         AppAuth.getInstance().authSharedFlow.map { it != null }.asLiveData(Dispatchers.Default)
 
-    fun authentication(login: String, password: String) = viewModelScope.launch {
+    fun registration(login: String, password: String, name: String) = viewModelScope.launch {
         try {
             _loginState.value = LoginState(logining = true)
-            val token = repository.authentication(login, password)
+            val token = repository.registration(login, password, name)
             if (token != null) {
                 AppAuth.getInstance().setAuth(token.id, token.token)
             }

@@ -6,10 +6,28 @@
     android:layout_height="match_parent"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    tools:context=".activity.LoginFragment">
+    tools:context=".activity.RegistrationFragment">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/loginLayout"
+        android:id="@+id/nameRegistrationLayout"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
+        android:hint="@string/name"
+        app:startIconDrawable="@drawable/ic_person_24">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/nameRegistrationEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/loginRegistrationLayout"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,14 +38,14 @@
         app:startIconDrawable="@drawable/ic_login_24">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/loginEditText"
+            android:id="@+id/loginRegistrationEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/passwordLayout"
+        android:id="@+id/passwordRegistrationLayout"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -38,7 +56,26 @@
         app:startIconDrawable="@drawable/ic_lock_24dp">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/passwordEditText"
+            android:id="@+id/passwordRegistrationEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/passwordRegistrationLayout2"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:hint="@string/password2"
+        app:startIconDrawable="@drawable/ic_lock_24dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/passwordRegistrationEditText2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword" />
@@ -46,15 +83,15 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/loginButton"
+        android:id="@+id/registrationButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
         android:layout_gravity="center_horizontal|bottom"
+        android:layout_margin="16dp"
         android:text="@string/login_button" />
 
     <ProgressBar
-        android:id="@+id/progressLogin"
+        android:id="@+id/progressRegistration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

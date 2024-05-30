@@ -136,9 +136,9 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         return dao.getLastId() ?: 0
     }
 
-    override suspend fun login(login: String, password: String): Token? {
+    override suspend fun authentication(login: String, password: String): Token? {
         try {
-            val response = PostApi.retrofitService.login(login, password)
+            val response = PostApi.retrofitService.authentication(login, password)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             return response.body()
         } catch (e: IOException) {
@@ -152,6 +152,21 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         }
     }
 
+    override suspend fun registration(login: String, password: String, name: String): Token? {
+        try {
+            val response = PostApi.retrofitService.registration(login, password, name)
+            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+            return response.body()
+        } catch (e: IOException) {
+            throw NetworkError
+
+        } catch (e: ApiError) {
+            throw e
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
 
     private suspend fun setStateEditedOrNew(post: Post) {
         val postEntity = dao.getById(post.id)
