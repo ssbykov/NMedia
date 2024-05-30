@@ -13,6 +13,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Multipart
 import retrofit2.http.POST
@@ -23,6 +25,7 @@ import ru.netology.nmedia.Constants.BASE_URL_SLOW
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.Token
 import java.util.concurrent.TimeUnit
 
 
@@ -66,6 +69,10 @@ interface PostApiService {
 
     @POST("posts")
     suspend fun save(@Body post: Post): Response<Post>
+
+    @FormUrlEncoded
+    @POST("users/authentication")
+    suspend fun login(@Field("login") login: String, @Field("pass") pass: String): Response<Token>
 
     @Multipart
     @POST("media")

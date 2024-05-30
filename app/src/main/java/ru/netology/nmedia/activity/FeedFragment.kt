@@ -70,7 +70,6 @@ class FeedFragment : Fragment() {
             if (state.error) {
                 Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
                     .setAction(R.string.retry_loading) {
-                        viewModel
                         viewModel.loadPosts()
                     }
                     .setAnchorView(binding.add)

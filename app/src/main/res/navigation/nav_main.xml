@@ -47,4 +47,9 @@
         android:name="ru.netology.nmedia.activity.AttachmentFragment"
         android:label="fragment_attachment"
         tools:layout="@layout/fragment_attachment" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="ru.netology.nmedia.activity.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" />
 </navigation>

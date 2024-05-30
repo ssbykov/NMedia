@@ -14,6 +14,7 @@ import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.Token
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostMapperImpl
 import ru.netology.nmedia.entity.StateType
@@ -131,6 +132,22 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun getLastId(): Long {
         return dao.getLastId() ?: 0
+    }
+
+    override suspend fun login(login: String, password: String): Token? {
+        try {
+            val response = PostApi.retrofitService.login(login, password)
+            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+            return response.body()
+        } catch (e: IOException) {
+            return null
+
+        } catch (e: ApiError) {
+            throw e
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
     }
 
 

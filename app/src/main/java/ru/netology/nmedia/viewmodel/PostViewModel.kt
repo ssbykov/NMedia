@@ -1,7 +1,6 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
-import android.icu.util.Calendar
 import android.net.Uri
 import androidx.core.net.toFile
 import androidx.lifecycle.AndroidViewModel
@@ -43,6 +42,7 @@ val empty = Post(
 class PostViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = PostRepositoryImpl(AppDb.getInstance(application).postDao())
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val data = AppAuth.getInstance().authStateFlow.flatMapLatest { auth ->
         repository.data.map { posts ->
