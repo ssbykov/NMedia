@@ -139,7 +139,6 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
             viewModelScope.launch {
                 try {
                     val newPost = if (it.content != content) {
-                        _dataState.value = FeedModelState(loading = true)
                         it.copy(content = content)
                     } else it
 
