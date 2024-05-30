@@ -88,7 +88,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_margin="16dp"
-        android:text="@string/login_button" />
+        android:text="@string/send" />
 
     <ProgressBar
         android:id="@+id/progressRegistration"

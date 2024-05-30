@@ -30,13 +30,24 @@ class RegistrationFragment : Fragment() {
 
         with(binding) {
             registrationButton.setOnClickListener {
+                val password = passwordRegistrationEditText.text.toString()
+                val confirmPassword = passwordRegistrationEditText2.text.toString()
+                if (password != confirmPassword ) {
+                    passwordRegistrationLayout2.error = "Пароли не совпадают"
+                    return@setOnClickListener
+                } else passwordRegistrationLayout2.error = null
                 viewModel.registration(
                     login = loginRegistrationEditText.text.toString(),
-                    password = passwordRegistrationEditText.text.toString(),
+                    password = password,
                     name = nameRegistrationEditText.text.toString()
                 )
             }
         }
+
+        fun checkPasswordMatch(password: String, confirmPassword: String): Boolean {
+            return password == confirmPassword
+        }
+
         viewModel.loginState.observe(viewLifecycleOwner) { state ->
             binding.progressRegistration.isVisible = state.logining
             if (state.error) {
