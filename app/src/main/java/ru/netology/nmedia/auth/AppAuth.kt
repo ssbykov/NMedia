@@ -3,6 +3,7 @@ package ru.netology.nmedia.auth
 import android.content.Context
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import ru.netology.nmedia.dto.Token
 
@@ -12,6 +13,8 @@ class AppAuth private constructor(context: Context) {
 
     private val _authStateFlow = MutableStateFlow<Token?>(null)
     val authStateFlow = _authStateFlow.asStateFlow()
+
+    val authSharedFlow = _authStateFlow.asSharedFlow()
 
     companion object {
         private const val ID_KEY = "ID_KEY"

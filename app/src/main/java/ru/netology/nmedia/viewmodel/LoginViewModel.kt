@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
@@ -21,7 +22,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     val loginState: LiveData<LoginState>
         get() = _loginState
 
-    val isLogin = AppAuth.getInstance().authStateFlow.asLiveData(Dispatchers.Default)
+    val isLogin =
+        AppAuth.getInstance().authSharedFlow.map { it != null }.asLiveData(Dispatchers.Default)
 
     fun login(login: String, password: String) = viewModelScope.launch {
         try {

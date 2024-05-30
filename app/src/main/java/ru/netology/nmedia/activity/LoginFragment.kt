@@ -1,17 +1,17 @@
 package ru.netology.nmedia.activity
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
+import ru.netology.nmedia.activity.FeedFragment.Companion.nextPageArg
 import ru.netology.nmedia.databinding.FragmentLoginBinding
-import ru.netology.nmedia.databinding.FragmentNewPostBinding
 import ru.netology.nmedia.viewmodel.LoginViewModel
 
 class LoginFragment : Fragment() {
@@ -38,13 +38,15 @@ class LoginFragment : Fragment() {
         viewModel.loginState.observe(viewLifecycleOwner) { state ->
             binding.progressLogin.isVisible = state.logining
             if (state.error) {
-                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(binding.root, R.string.error_login, Snackbar.LENGTH_LONG).show()
             }
         }
 
-        viewModel.isLogin.observe(viewLifecycleOwner){
-            if (it != null) {
-                findNavController().navigateUp()
+        viewModel.isLogin.observe(viewLifecycleOwner) {state->
+            if (state) {
+                if(arguments != null) {
+                    findNavController().navigate(requireNotNull(arguments?.nextPageArg))
+                } else findNavController().navigateUp()
             }
         }
         return binding.root

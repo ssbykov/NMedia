@@ -11,6 +11,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
@@ -74,13 +75,14 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     private suspend fun insertNewApiPosts(newApiPosts: List<Post>) {
         val newLocalPosts = dao.getAllsync().filter { it.state == StateType.NEW }
+        val authorId = AppAuth.getInstance().authStateFlow.value?.id
         if (newLocalPosts.size == 0) {
             dao.insert(
                 newApiPosts.toEntity()
                     .map {
                         it.copy(
                             state = null,
-                            visible = if (it.author == "Student") true else false
+                            visible = if (it.authorId == authorId) true else false
                         )
                     })
         }
@@ -140,7 +142,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             return response.body()
         } catch (e: IOException) {
-            return null
+            throw NetworkError
 
         } catch (e: ApiError) {
             throw e

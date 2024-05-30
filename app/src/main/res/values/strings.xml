@@ -29,6 +29,7 @@
     <string name="base_url" translatable="false">"http://10.0.2.2:9999/api/slow/posts"</string>
     <string name="attachment_image">Attachment image</string>
     <string name="error_loading">Error loading data</string>
+    <string name="error_login">"Couldn't log in to the app!"</string>
     <string name="retry_loading">Retry</string>
     <string name="new_posts">New posts (%1$s)</string>
     <string name="save">Save</string>

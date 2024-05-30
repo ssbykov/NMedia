@@ -48,8 +48,9 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         repository.data.map { posts ->
             FeedModel(posts.map { it.copy(ownedByMy = it.authorId == auth?.id) })
         }
-
     }.asLiveData(Dispatchers.Default)
+
+    val isLogin = AppAuth.getInstance().authSharedFlow.map { it != null }.asLiveData()
 
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 

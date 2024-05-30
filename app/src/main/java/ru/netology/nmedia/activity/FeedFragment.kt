@@ -12,7 +12,9 @@ import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.adapter.PostsSetupClickListeners
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
+import ru.netology.nmedia.utils.IntArg
 import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
 
@@ -28,6 +30,7 @@ class FeedFragment : Fragment() {
     companion object {
         var Bundle.textArg: String? by StringArg
         var Bundle.urlArg: String? by StringArg
+        var Bundle.nextPageArg: Int? by IntArg
     }
 
     override fun onCreateView(
@@ -92,9 +95,17 @@ class FeedFragment : Fragment() {
 
 
         binding.add.setOnClickListener {
-            currentSize = adapter.currentList.size
-            viewModel.dropPhoto()
-            findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+            viewModel.isLogin.observe(viewLifecycleOwner) { state ->
+                if (!state) {
+                    findNavController().navigate(
+                        R.id.action_feedFragment_to_loginFragment,
+                        Bundle().apply { nextPageArg = R.id.newPostFragment })
+                } else {
+                    currentSize = adapter.currentList.size
+                    viewModel.dropPhoto()
+                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+                }
+            }
         }
 
     }
