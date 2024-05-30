@@ -10,7 +10,6 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
-import ru.netology.nmedia.activity.FeedFragment.Companion.nextPageArg
 import ru.netology.nmedia.databinding.FragmentLoginBinding
 import ru.netology.nmedia.viewmodel.LoginViewModel
 
@@ -44,7 +43,7 @@ class LoginFragment : Fragment() {
 
         viewModel.isLogin.observe(viewLifecycleOwner) {state->
             if (state) {
-                findNavController().navigate(R.id.feedFragment)
+                findNavController().navigateUp()
             }
         }
         return binding.root
