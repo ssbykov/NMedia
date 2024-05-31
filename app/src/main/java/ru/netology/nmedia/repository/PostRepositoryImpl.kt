@@ -7,8 +7,10 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
 import ru.netology.nmedia.auth.AppAuth
@@ -159,6 +161,35 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             return response.body()
         } catch (e: IOException) {
             throw NetworkError
+
+        } catch (e: ApiError) {
+            throw e
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun registerWithPhoto(
+        login: String,
+        password: String,
+        name: String,
+        upload: File
+    ): Token? {
+        try {
+            val loginPart = login.toRequestBody("text/plain".toMediaType())
+            val passwordPart = password.toRequestBody("text/plain".toMediaType())
+            val namePart = name.toRequestBody("text/plain".toMediaType())
+            val media = MultipartBody.Part.createFormData(
+                "file", upload.name, upload.asRequestBody()
+            )
+            val response =
+                PostApi.retrofitService.registerWithPhoto(loginPart, passwordPart, namePart, media)
+            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+
+            return response.body() ?: throw ApiError(response.code(), response.message())
+        } catch (e: IOException) {
+            return null
 
         } catch (e: ApiError) {
             throw e

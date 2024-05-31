@@ -14,9 +14,16 @@ interface PostRepository {
     suspend fun shareById(post: Post)
     suspend fun removeById(id: Long)
     suspend fun save(post: Post)
-    suspend fun  upload(upload: File): Media?
+    suspend fun upload(upload: File): Media?
     suspend fun getLastId(): Long
     suspend fun authentication(login: String, password: String): Token?
     suspend fun registration(login: String, password: String, name: String): Token?
+    suspend fun registerWithPhoto(
+        login: String,
+        password: String,
+        name: String,
+        upload: File
+    ): Token?
+
     fun getNewerCoutn(id: Long): Flow<Int>
 }
