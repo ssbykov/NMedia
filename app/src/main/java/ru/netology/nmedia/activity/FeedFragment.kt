@@ -72,7 +72,7 @@ class FeedFragment : Fragment() {
                         val contint = draftPrefs.getString(KEY_CONTENT, "").toString()
                         val uri = draftPrefs.getString(KEY_ATTACHMENT, "").toString()
 
-                        return if (contint.isNotBlank() || uri.isNotBlank()) {
+                        return if (contint.isNotEmpty() || !uri.isNullOrBlank() && uri != "null") {
                             MaterialAlertDialogBuilder(binding.root.context)
                                 .setTitle(getString(R.string.exit_confirmation_title))
                                 .setMessage(getString(R.string.exit_confirmation_message))

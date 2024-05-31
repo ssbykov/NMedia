@@ -56,16 +56,21 @@ class RegistrationFragment : Fragment() {
                     return@setOnClickListener
                 } else passwordRegistrationLayout.error = null
 
-                if (password != confirmPassword ) {
+                if (password != confirmPassword) {
                     passwordRegistrationLayout2.error = "Пароли не совпадают"
                     return@setOnClickListener
                 } else passwordRegistrationLayout2.error = null
 
-                viewModel.registration(
-                    login = login,
-                    password = password,
-                    name = name
-                )
+                viewModel.avatar.observe(viewLifecycleOwner) { avatar ->
+                    viewModel.registration(
+                        login = login,
+                        password = password,
+                        name = name,
+                        avatar = avatar.file
+
+                    )
+
+                }
                 AndroidUtils.hideKeyboard(requireView())
             }
         }
@@ -84,6 +89,7 @@ class RegistrationFragment : Fragment() {
                     Activity.RESULT_OK -> {
                         val uri = it.data?.data
                         binding.avatar.setImageURI(uri)
+                        viewModel.changeAvatar(uri, uri?.toFile())
                     }
                 }
             }
@@ -109,7 +115,7 @@ class RegistrationFragment : Fragment() {
             }
         }
 
-        viewModel.isLogin.observe(viewLifecycleOwner) {state->
+        viewModel.isLogin.observe(viewLifecycleOwner) { state ->
             if (state) {
                 findNavController().navigateUp()
             }

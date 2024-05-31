@@ -65,7 +65,7 @@ class PostViewHolder(
             Glide.with(avatar)
                 .load("$BASE_URL_AVATAR${post.authorAvatar}")
                 .placeholder(R.drawable.ic_loading_100dp)
-                .error(R.drawable.ic_error_100dp)
+                .error(R.drawable.ic_face_48)
                 .timeout(30_000)
                 .circleCrop()
                 .into(avatar)
