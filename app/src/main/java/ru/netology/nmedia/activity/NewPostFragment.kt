@@ -23,6 +23,8 @@ import com.github.dhaval2404.imagepicker.ImagePicker
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.Constants
+import ru.netology.nmedia.Constants.KEY_ATTACHMENT
+import ru.netology.nmedia.Constants.KEY_CONTENT
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.activity.FeedFragment.Companion.urlArg
@@ -39,10 +41,6 @@ class NewPostFragment : Fragment() {
         ownerProducer = ::requireParentFragment
     )
 
-    companion object {
-        private const val KEY_CONTENT = "KEY_CONTENT"
-        private const val KEY_ATTACHMENT = "KEY_ATTACHMENT"
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -83,8 +81,8 @@ class NewPostFragment : Fragment() {
                     viewModel.changePhoto(uri)
                 } else viewModel.dropPhoto()
             } else {
-                val draft = draftPrefs.getString(KEY_CONTENT, "").toString()
-                content.setText(draft)
+                val contint = draftPrefs.getString(KEY_CONTENT, "").toString()
+                content.setText(contint)
                 val uri = Uri.parse(draftPrefs.getString(KEY_ATTACHMENT, "").toString())
                 if (uri.toString() != "null" && uri.toString() != "") viewModel.changePhoto(
                     uri,

@@ -46,4 +46,9 @@
     <string name="send">SEND</string>
     <string name="required">Required</string>
     <string name="psw_not_match">"Passwords don't match"</string>
+    <string name="exit_confirmation_title">Are you sure?</string>
+    <string name="exit_confirmation_message">There is an unfinished post in the draft.</string>
+    <string name="exit">EXIT</string>
+    <string name="no">NO</string>
+
 </resources>
