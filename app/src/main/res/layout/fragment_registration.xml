@@ -8,6 +8,18 @@
     android:orientation="vertical"
     tools:context=".activity.RegistrationFragment">
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/avatar"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_gravity="center"
+        app:shapeAppearanceOverlay="@style/Circular"
+        android:contentDescription="@string/description_post_author_avatar"
+        app:layout_constraintBottom_toBottomOf="@id/barrier"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_face_48" />
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/nameRegistrationLayout"
         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"

@@ -1,13 +1,18 @@
 package ru.netology.nmedia.activity
 
+import android.app.Activity
 import androidx.fragment.app.viewModels
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toFile
 import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentLoginBinding
@@ -65,6 +70,37 @@ class RegistrationFragment : Fragment() {
             }
         }
 
+        val pickPhotoLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                when (it.resultCode) {
+                    ImagePicker.RESULT_ERROR -> {
+                        Snackbar.make(
+                            binding.root,
+                            ImagePicker.getError(it.data),
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    }
+
+                    Activity.RESULT_OK -> {
+                        val uri = it.data?.data
+                        binding.avatar.setImageURI(uri)
+                    }
+                }
+            }
+
+
+        binding.avatar.setOnClickListener {
+            ImagePicker.with(this@RegistrationFragment)
+                .crop()
+                .compress(256)
+                .galleryMimeTypes(
+                    arrayOf(
+                        "image/png",
+                        "image/jpeg",
+                    )
+                )
+                .createIntent(pickPhotoLauncher::launch)
+        }
 
         viewModel.loginState.observe(viewLifecycleOwner) { state ->
             binding.progressRegistration.isVisible = state.logining
