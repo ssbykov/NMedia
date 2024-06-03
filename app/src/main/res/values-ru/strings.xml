@@ -26,4 +26,20 @@
     <string name="save">Сохранить</string>
     <string name="remove">УДАЛИТЬ</string>
     <string name="description_photo">Описание изображения</string>
+    <string name="sign_in">Войти</string>
+    <string name="sign_up">Регистрация</string>
+    <string name="logout">Выйти</string>
+    <string name="password">Пароль</string>
+    <string name="login">Логин</string>
+    <string name="login_button">ВОЙТИ</string>
+    <string name="error_login">Не удалось войти в приложение</string>
+    <string name="name">Имя</string>
+    <string name="password2">Пароль 2</string>
+    <string name="send">ОТПРАВИТЬ</string>
+    <string name="required">Обязательное</string>
+    <string name="psw_not_match">Пароли не совпадают</string>
+    <string name="exit_confirmation_title">Вы уверены?</string>
+    <string name="exit_confirmation_message">В черновике остался незавершенный пост.</string>
+    <string name="exit">ВЫЙТИ</string>
+    <string name="no">НЕТ</string>
 </resources>

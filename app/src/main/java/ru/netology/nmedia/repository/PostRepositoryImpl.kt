@@ -7,13 +7,17 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
 import ru.netology.nmedia.api.PostApi
+import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.Token
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostMapperImpl
 import ru.netology.nmedia.entity.StateType
@@ -73,13 +77,14 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     private suspend fun insertNewApiPosts(newApiPosts: List<Post>) {
         val newLocalPosts = dao.getAllsync().filter { it.state == StateType.NEW }
+        val authorId = AppAuth.getInstance().authStateFlow.value?.id
         if (newLocalPosts.size == 0) {
             dao.insert(
                 newApiPosts.toEntity()
                     .map {
                         it.copy(
                             state = null,
-                            visible = if (it.author == "Student") true else false
+                            visible = if (it.authorId == authorId) true else false
                         )
                     })
         }
@@ -133,6 +138,66 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         return dao.getLastId() ?: 0
     }
 
+    override suspend fun authentication(login: String, password: String): Token? {
+        try {
+            val response = PostApi.retrofitService.authentication(login, password)
+            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+            return response.body()
+        } catch (e: IOException) {
+            throw NetworkError
+
+        } catch (e: ApiError) {
+            throw e
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun registration(login: String, password: String, name: String): Token? {
+        try {
+            val response = PostApi.retrofitService.registration(login, password, name)
+            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+            return response.body()
+        } catch (e: IOException) {
+            throw NetworkError
+
+        } catch (e: ApiError) {
+            throw e
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
+
+    override suspend fun registerWithPhoto(
+        login: String,
+        password: String,
+        name: String,
+        upload: File
+    ): Token? {
+        try {
+            val loginPart = login.toRequestBody("text/plain".toMediaType())
+            val passwordPart = password.toRequestBody("text/plain".toMediaType())
+            val namePart = name.toRequestBody("text/plain".toMediaType())
+            val media = MultipartBody.Part.createFormData(
+                "file", upload.name, upload.asRequestBody()
+            )
+            val response =
+                PostApi.retrofitService.registerWithPhoto(loginPart, passwordPart, namePart, media)
+            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+
+            return response.body() ?: throw ApiError(response.code(), response.message())
+        } catch (e: IOException) {
+            return null
+
+        } catch (e: ApiError) {
+            throw e
+
+        } catch (e: Exception) {
+            throw UnknownError
+        }
+    }
 
     private suspend fun setStateEditedOrNew(post: Post) {
         val postEntity = dao.getById(post.id)

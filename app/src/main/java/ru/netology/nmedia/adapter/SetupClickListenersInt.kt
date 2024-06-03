@@ -29,7 +29,13 @@ open class SetupClickListeners(
 ) : SetupClickListenersInt {
 
     override fun onLikeListener(post: Post) {
-        viewModel.likeById(post)
+        viewModel.isLogin.observe(fragment.viewLifecycleOwner) { state ->
+            if (!state) {
+                fragment.findNavController().navigate(R.id.loginFragment)
+            } else {
+                viewModel.likeById(post)
+            }
+        }
     }
 
     override fun onShareListener(post: Post) {
@@ -58,9 +64,7 @@ open class SetupClickListeners(
             R.id.newPostFragment,
             Bundle().apply {
                 textArg = post.content
-                if (post.attachment != null) {
-                    urlArg = post.attachment.url
-                }
+                urlArg = post.attachment?.url
             }
         )
     }

@@ -1,7 +1,6 @@
 package ru.netology.nmedia.activity
 
 import android.app.Activity
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -20,14 +19,12 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.Constants
+import ru.netology.nmedia.Constants.KEY_ATTACHMENT
+import ru.netology.nmedia.Constants.KEY_CONTENT
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.activity.FeedFragment.Companion.urlArg
@@ -36,16 +33,14 @@ import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.viewmodel.PostViewModel
-import java.io.File
 
 class NewPostFragment : Fragment() {
 
-    private val KEY_CONTENT = "newPost"
-    private val KEY_ATTACHMENT = "newAttachment"
 
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
     )
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -78,21 +73,22 @@ class NewPostFragment : Fragment() {
 
             if (arguments?.textArg != null) {
                 content.setText(arguments?.textArg)
+                if (arguments?.urlArg != null) {
+                    Glide.with(binding.photo)
+                        .load("${Constants.BASE_URL_IMAGES}${arguments?.urlArg}")
+                        .into(binding.photo)
+                    val uri = Uri.parse(arguments?.urlArg)
+                    viewModel.changePhoto(uri)
+                } else viewModel.dropPhoto()
             } else {
-                val draft = draftPrefs.getString(KEY_CONTENT, "").toString()
-                content.setText(draft)
-                draftPrefs.edit().putString(KEY_CONTENT, "").apply()
-            }
-
-            if (arguments?.urlArg != null) {
-                Glide.with(binding.photo)
-                    .load("${Constants.BASE_URL_IMAGES}${arguments?.urlArg}")
-                    .into(binding.photo)
-                val uri = Uri.parse(arguments?.urlArg)
-                viewModel.changePhoto(uri)
-            } else {
+                val contint = draftPrefs.getString(KEY_CONTENT, "").toString()
+                content.setText(contint)
                 val uri = Uri.parse(draftPrefs.getString(KEY_ATTACHMENT, "").toString())
-                if (uri.toString() != "null" && uri.toString() != "")  viewModel.changePhoto(uri, uri.toFile())
+                if (uri.toString() != "null" && uri.toString() != "") viewModel.changePhoto(
+                    uri,
+                    uri.toFile()
+                )
+                draftPrefs.edit().putString(KEY_CONTENT, "").apply()
                 draftPrefs.edit().putString(KEY_ATTACHMENT, "").apply()
             }
 
@@ -180,7 +176,8 @@ class NewPostFragment : Fragment() {
                         viewModel.clear()
                         viewModel.dropPhoto()
                     } else {
-                        draftPrefs.edit().putString(KEY_CONTENT, content.text.toString()).apply()
+                        draftPrefs.edit().putString(KEY_CONTENT, content.text.toString())
+                            .apply()
                         val uri = viewModel.photo.value?.uri.toString()
                         draftPrefs.edit().putString(KEY_ATTACHMENT, uri).apply()
                     }

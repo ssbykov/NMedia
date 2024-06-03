@@ -50,6 +50,7 @@ class AppActivity : AppCompatActivity() {
         requestNotificationsPermission()
 
         checkGoogleApiAvailability()
+
     }
 
     private fun requestNotificationsPermission() {
@@ -72,12 +73,14 @@ class AppActivity : AppCompatActivity() {
             if (code == ConnectionResult.SUCCESS) {
                 return@with
             }
-            if (isUserResolvableError(code)){
+            if (isUserResolvableError(code)) {
                 getErrorDialog(this@AppActivity, code, 9000)?.show()
                 return
             }
-            Toast.makeText(this@AppActivity,
-                getString(R.string.google_api_unavailability), Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                this@AppActivity,
+                getString(R.string.google_api_unavailability), Toast.LENGTH_LONG
+            ).show()
         }
     }
 }

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -64,7 +65,7 @@ class PostViewHolder(
             Glide.with(avatar)
                 .load("$BASE_URL_AVATAR${post.authorAvatar}")
                 .placeholder(R.drawable.ic_loading_100dp)
-                .error(R.drawable.ic_error_100dp)
+                .error(R.drawable.ic_face_48)
                 .timeout(30_000)
                 .circleCrop()
                 .into(avatar)
@@ -105,6 +106,7 @@ class PostViewHolder(
                 setupClickListeners.onImageListener(post.attachment?.url)
             }
             // инициализация меню
+            menu.isVisible = post.ownedByMy
             menu.setOnClickListener {
                 PopupMenu(it.context, it).apply {
                     inflate(R.menu.options_post)

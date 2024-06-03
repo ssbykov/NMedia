@@ -9,4 +9,7 @@ object Constants {
     const val BASE_URL_SLOW = "$BASE_URL/api/slow/"
     const val BASE_URL_IMAGES = "$BASE_URL/media/"
     const val SDRF = "dd MMMM в H:mm"
+
+    const val KEY_CONTENT = "KEY_CONTENT"
+    const val KEY_ATTACHMENT = "KEY_ATTACHMENT"
 }
