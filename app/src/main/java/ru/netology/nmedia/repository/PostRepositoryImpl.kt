@@ -12,7 +12,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
-import ru.netology.nmedia.api.PostApi
+import ru.netology.nmedia.api.Api
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Media
@@ -42,7 +42,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         synchronize(postEntites, dao)
         try {
             val response =
-                PostApi.retrofitService.getNewer(localSynchronizedPosts.firstOrNull()?.id ?: 0)
+                Api.retrofitService.getNewer(localSynchronizedPosts.firstOrNull()?.id ?: 0)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val newPosts = response.body() ?: throw UnknownError
             insertNewApiPosts(newPosts)
@@ -62,7 +62,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         while (true) {
             emit(0)
             delay(10_000L)
-            val response = PostApi.retrofitService.getNewer(id)
+            val response = Api.retrofitService.getNewer(id)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val newPosts = response.body() ?: throw UnknownError
             insertNewApiPosts(newPosts)
@@ -112,9 +112,9 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             try {
                 dao.likeById(post.id)
                 val response = if (post.likedByMe) {
-                    PostApi.retrofitService.unlikeById(post.id)
+                    Api.retrofitService.unlikeById(post.id)
                 } else {
-                    PostApi.retrofitService.likeById(post.id)
+                    Api.retrofitService.likeById(post.id)
                 }
                 if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             } catch (e: Exception) {
@@ -125,7 +125,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
     override suspend fun shareById(post: Post) {
-        PostApi.retrofitService.save(post.copy(shares = post.shares + 1))
+        Api.retrofitService.save(post.copy(shares = post.shares + 1))
     }
 
 
@@ -140,7 +140,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun authentication(login: String, password: String): Token? {
         try {
-            val response = PostApi.retrofitService.authentication(login, password)
+            val response = Api.retrofitService.authentication(login, password)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             return response.body()
         } catch (e: IOException) {
@@ -156,7 +156,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun registration(login: String, password: String, name: String): Token? {
         try {
-            val response = PostApi.retrofitService.registration(login, password, name)
+            val response = Api.retrofitService.registration(login, password, name)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             return response.body()
         } catch (e: IOException) {
@@ -184,7 +184,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                 "file", upload.name, upload.asRequestBody()
             )
             val response =
-                PostApi.retrofitService.registerWithPhoto(loginPart, passwordPart, namePart, media)
+                Api.retrofitService.registerWithPhoto(loginPart, passwordPart, namePart, media)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
 
             return response.body() ?: throw ApiError(response.code(), response.message())
@@ -217,7 +217,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             val media = MultipartBody.Part.createFormData(
                 "file", upload.name, upload.asRequestBody()
             )
-            val response = PostApi.retrofitService.upload(media)
+            val response = Api.retrofitService.upload(media)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
 
             return response.body() ?: throw ApiError(response.code(), response.message())

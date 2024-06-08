@@ -24,3 +24,7 @@ data class Attachment(
 enum class AttachmentType {
     IMAGE
 }
+
+data class PushToken(
+    val token: String,
+)

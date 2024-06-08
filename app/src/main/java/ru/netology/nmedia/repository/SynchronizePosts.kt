@@ -1,6 +1,6 @@
 package ru.netology.nmedia.repository
 
-import ru.netology.nmedia.api.PostApi
+import ru.netology.nmedia.api.Api
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostMapperImpl
@@ -17,7 +17,7 @@ suspend fun synchronize(posts: List<PostEntity>?, dao: PostDao) {
         try {
             val newPost = when (postEntity.state) {
                 StateType.NEW -> {
-                    val response = PostApi.retrofitService.save(
+                    val response = Api.retrofitService.save(
                         PostMapperImpl.toDto(postEntity).copy(id = 0)
                     )
                     if (!response.isSuccessful) throw ApiError(
@@ -32,7 +32,7 @@ suspend fun synchronize(posts: List<PostEntity>?, dao: PostDao) {
 
                 StateType.EDITED -> {
                     val response =
-                        PostApi.retrofitService.save(PostMapperImpl.toDto(postEntity))
+                        Api.retrofitService.save(PostMapperImpl.toDto(postEntity))
                     if (!response.isSuccessful) throw ApiError(
                         response.code(),
                         response.message()
@@ -41,7 +41,7 @@ suspend fun synchronize(posts: List<PostEntity>?, dao: PostDao) {
                 }
 
                 StateType.DELETED -> {
-                    val response = PostApi.retrofitService.removeById(postEntity.id)
+                    val response = Api.retrofitService.removeById(postEntity.id)
                     if (!response.isSuccessful) throw ApiError(
                         response.code(),
                         response.message()

@@ -24,6 +24,7 @@ import ru.netology.nmedia.Constants.BASE_URL_SLOW
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.Token
 import java.util.concurrent.TimeUnit
 
@@ -56,7 +57,7 @@ private val retrofit = Retrofit.Builder()
     .baseUrl(BASE_URL_SLOW)
     .build()
 
-interface PostApiService {
+interface ApiService {
     @GET("posts")
     suspend fun getAll(): Response<List<Post>>
 
@@ -68,6 +69,8 @@ interface PostApiService {
 
     @POST("posts")
     suspend fun save(@Body post: Post): Response<Post>
+    @POST("users/push-tokens")
+    suspend fun saveToken(@Body pushToken: PushToken): Response<Unit>
 
     @FormUrlEncoded
     @POST("users/authentication")
@@ -104,8 +107,8 @@ interface PostApiService {
     suspend fun unlikeById(@Path("id") id: Long): Response<Post>
 }
 
-object PostApi {
-    val retrofitService: PostApiService by lazy {
-        retrofit.create<PostApiService>()
+object Api {
+    val retrofitService: ApiService by lazy {
+        retrofit.create<ApiService>()
     }
 }

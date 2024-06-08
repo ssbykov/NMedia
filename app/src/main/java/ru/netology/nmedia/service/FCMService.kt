@@ -13,6 +13,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
 import ru.netology.nmedia.R
+import ru.netology.nmedia.auth.AppAuth
 import kotlin.random.Random
 
 class FCMService : FirebaseMessagingService() {
@@ -20,6 +21,7 @@ class FCMService : FirebaseMessagingService() {
     private val action = "action"
     private val content = "content"
     private val channelId = "remote"
+    private val recipientId = "recipientId"
     private val gson = Gson()
 
     override fun onCreate() {
@@ -43,42 +45,51 @@ class FCMService : FirebaseMessagingService() {
             }
             when (val action = Action.valueOf(it)) {
                 Action.LIKE -> {
+                    val content = gson.fromJson(message.data[content], Like::class.java)
                     handleNotification(
-                        Like(),
-                        message,
+                        content,
                         stringRes = R.string.notification_user_liked,
                         fields = action.fields
                     )
                 }
 
                 Action.NEW_POST -> {
+                    val content = gson.fromJson(message.data[content], NewPost::class.java)
                     handleNotification(
-                        NewPost(),
-                        message,
+                        content,
                         stringRes = R.string.notification_user_new_post,
                         fields = action.fields
                     )
                 }
             }
         }
+        message.data[content]?.let {
+            if (recipientId !in it) {
+                return@let
+            }
+            val userId = AppAuth.getInstance().authStateFlow.value?.id
+            val content = gson.fromJson(message.data[content], NewNotification::class.java)
+            if (content.recipientId == null && content.recipientId == userId) {
+                handleNotification(
+                    content,
+                    stringRes = R.string.new_notification,
+                    fields = arrayOf("content")
+                )
+            } else AppAuth.getInstance().sendPushToken()
+        }
+
     }
 
     override fun onNewToken(token: String) {
-        println(token)
-
+        AppAuth.getInstance().sendPushToken(token)
     }
 
     private fun handleNotification(
-        obj: Any,
-        message: RemoteMessage,
+        content: Any,
         stringRes: Int,
         smallIconRes: Int = R.drawable.ic_notification,
         fields: Array<String>
     ) {
-        val content = gson.fromJson(
-            message.data[content],
-            obj::class.java
-        )
 
         val strings = content.javaClass.declaredFields.filter {
             it.isAccessible = true
@@ -98,7 +109,7 @@ class FCMService : FirebaseMessagingService() {
                 if (content is NewPost) {
                     it.setStyle(
                         NotificationCompat.BigTextStyle()
-                            .bigText("${content.content.substring(0,100)}...")
+                            .bigText("${content.content.substring(0, 100)}...")
                     )
                 }
             }

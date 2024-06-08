@@ -18,3 +18,8 @@ data class NewPost(
     val postId: Long = 0,
     val content: String = "",
 )
+
+data class NewNotification(
+    val recipientId: Long? = 0,
+    val content: String = "",
+)
