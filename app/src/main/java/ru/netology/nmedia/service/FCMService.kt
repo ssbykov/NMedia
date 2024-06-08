@@ -54,7 +54,7 @@ class FCMService : FirebaseMessagingService() {
                 }
 
                 Action.NEW_POST -> {
-                    val content = gson.fromJson(message.data[content], Like::class.java)
+                    val content = gson.fromJson(message.data[content], NewPost::class.java)
                     handleNotification(
                         content,
                         stringRes = R.string.notification_user_new_post,
