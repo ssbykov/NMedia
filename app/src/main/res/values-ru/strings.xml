@@ -42,4 +42,5 @@
     <string name="exit_confirmation_message">В черновике остался незавершенный пост.</string>
     <string name="exit">ВЫЙТИ</string>
     <string name="no">НЕТ</string>
+    <string name="new_notification">Новое уведомление: %1$s</string>
 </resources>

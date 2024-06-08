@@ -1,24 +1,21 @@
 package ru.netology.nmedia.activity
 
 import android.app.Activity
-import androidx.fragment.app.viewModels
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.net.toFile
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.github.dhaval2404.imagepicker.ImagePicker
-import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
-import ru.netology.nmedia.databinding.FragmentLoginBinding
 import ru.netology.nmedia.databinding.FragmentRegistrationBinding
 import ru.netology.nmedia.utils.AndroidUtils
-import ru.netology.nmedia.viewmodel.LoginViewModel
 import ru.netology.nmedia.viewmodel.RegistrationViewModel
 
 class RegistrationFragment : Fragment() {
