@@ -10,12 +10,18 @@ import com.bumptech.glide.Glide
 import ru.netology.nmedia.Constants
 import ru.netology.nmedia.adapter.PostsSetupClickListeners.Companion.imageId
 import ru.netology.nmedia.databinding.FragmentAttachmentBinding
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.viewmodel.PostViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class AttachmentFragment : Fragment() {
 
+    private val dependencyContainer = DependencyContainer.getInstance()
     private val viewModel: PostViewModel by viewModels(
-        ownerProducer = ::requireParentFragment
+        ownerProducer = ::requireParentFragment,
+        factoryProducer = {
+            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+        }
     )
 
     override fun onCreateView(

@@ -15,13 +15,19 @@ import com.github.dhaval2404.imagepicker.ImagePicker
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentRegistrationBinding
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.viewmodel.RegistrationViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class RegistrationFragment : Fragment() {
 
-
-    private val viewModel: RegistrationViewModel by viewModels()
+    private val dependencyContainer = DependencyContainer.getInstance()
+    private val viewModel: RegistrationViewModel by viewModels(
+        factoryProducer = {
+            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+        }
+    )
 
 
     override fun onCreateView(

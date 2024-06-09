@@ -1,11 +1,10 @@
 package ru.netology.nmedia.viewmodel
 
-import android.app.Application
 import android.net.Uri
 import androidx.core.net.toFile
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
@@ -16,8 +15,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.db.AppDb
-import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Post
@@ -40,11 +37,10 @@ val empty = Post(
     likedByMe = false
 )
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = DependencyContainer.getInstance().repository
-
-    private val appAuth = DependencyContainer.getInstance().appAuth
+class PostViewModel(
+    private val repository: PostRepositoryImpl,
+    appAuth: AppAuth
+) : ViewModel() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val data = appAuth.authStateFlow.flatMapLatest { auth ->

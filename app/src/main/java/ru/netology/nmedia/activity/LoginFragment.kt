@@ -11,12 +11,18 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentLoginBinding
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.viewmodel.LoginViewModel
+import ru.netology.nmedia.viewmodel.ViewModelFactory
 
 class LoginFragment : Fragment() {
 
-
-    private val viewModel: LoginViewModel by viewModels()
+    private val dependencyContainer = DependencyContainer.getInstance()
+    private val viewModel: LoginViewModel by viewModels(
+        factoryProducer = {
+            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
+        }
+    )
 
 
     override fun onCreateView(
@@ -41,7 +47,7 @@ class LoginFragment : Fragment() {
             }
         }
 
-        viewModel.isLogin.observe(viewLifecycleOwner) {state->
+        viewModel.isLogin.observe(viewLifecycleOwner) { state ->
             if (state) {
                 findNavController().navigateUp()
             }

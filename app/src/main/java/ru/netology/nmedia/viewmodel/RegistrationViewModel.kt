@@ -20,11 +20,10 @@ import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
 import java.io.File
 
-class RegistrationViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = DependencyContainer.getInstance().repository
-
-    private val appAuth = DependencyContainer.getInstance().appAuth
+class RegistrationViewModel(
+    private val repository: PostRepositoryImpl,
+    private val appAuth: AppAuth
+) : ViewModel() {
 
     private val _loginState = SingleLiveEvent<LoginState>()
     val loginState: LiveData<LoginState>
