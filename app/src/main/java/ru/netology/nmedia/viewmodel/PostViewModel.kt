@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
@@ -38,6 +39,7 @@ val empty = Post(
     likedByMe = false
 )
 
+@HiltViewModel
 class PostViewModel @Inject constructor(
     private val repository: PostRepositoryImpl,
     appAuth: AppAuth

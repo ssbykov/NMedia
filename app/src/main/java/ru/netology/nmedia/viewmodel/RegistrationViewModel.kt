@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -17,6 +18,7 @@ import ru.netology.nmedia.utils.SingleLiveEvent
 import java.io.File
 import javax.inject.Inject
 
+@HiltViewModel
 class RegistrationViewModel @Inject constructor(
     private val repository: PostRepositoryImpl,
     private val appAuth: AppAuth

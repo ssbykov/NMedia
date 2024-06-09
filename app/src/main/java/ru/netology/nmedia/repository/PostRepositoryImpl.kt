@@ -15,7 +15,6 @@ import okio.IOException
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
-import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.Token
@@ -35,6 +34,9 @@ class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
     private val apiService: ApiService
 ) : PostRepository {
+
+    @Inject
+    lateinit var appAuth: AppAuth
 
     val postEntites = dao.getAll()
     override val data = dao.getAllVisible()
@@ -82,7 +84,7 @@ class PostRepositoryImpl @Inject constructor(
 
     private suspend fun insertNewApiPosts(newApiPosts: List<Post>) {
         val newLocalPosts = dao.getAllsync().filter { it.state == StateType.NEW }
-        val authorId = DependencyContainer.getInstance().appAuth.authStateFlow.value?.id
+        val authorId = appAuth.authStateFlow.value?.id
         if (newLocalPosts.size == 0) {
             dao.insert(
                 newApiPosts.toEntity()
