@@ -24,7 +24,6 @@ class RegistrationFragment : Fragment() {
 
     private val viewModel: RegistrationViewModel by viewModels()
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
