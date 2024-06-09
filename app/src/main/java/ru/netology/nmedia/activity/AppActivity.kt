@@ -10,10 +10,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.activity.FeedFragment.Companion.textArg
 import ru.netology.nmedia.databinding.ActivityAppBinding
 
+@AndroidEntryPoint
 class AppActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {

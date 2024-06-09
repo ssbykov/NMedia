@@ -7,21 +7,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.bumptech.glide.Glide
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.Constants
 import ru.netology.nmedia.adapter.PostsSetupClickListeners.Companion.imageId
 import ru.netology.nmedia.databinding.FragmentAttachmentBinding
-import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.viewmodel.PostViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
 
+@AndroidEntryPoint
 class AttachmentFragment : Fragment() {
 
-    private val dependencyContainer = DependencyContainer.getInstance()
     private val viewModel: PostViewModel by viewModels(
-        ownerProducer = ::requireParentFragment,
-        factoryProducer = {
-            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-        }
+        ownerProducer = ::requireParentFragment
     )
 
     override fun onCreateView(

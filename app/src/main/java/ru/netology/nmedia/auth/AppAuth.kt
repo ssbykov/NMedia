@@ -14,8 +14,11 @@ import kotlinx.coroutines.tasks.await
 import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.dto.PushToken
 import ru.netology.nmedia.dto.Token
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class AppAuth(context: Context) {
+@Singleton
+class AppAuth @Inject constructor (context: Context) {
 
     private val prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE)
 

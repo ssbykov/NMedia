@@ -8,23 +8,19 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostSetupClickListeners
 import ru.netology.nmedia.adapter.PostViewHolder
 import ru.netology.nmedia.adapter.PostsSetupClickListeners.Companion.textPostID
 import ru.netology.nmedia.databinding.FragmentPostBinding
-import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.viewmodel.PostViewModel
-import ru.netology.nmedia.viewmodel.ViewModelFactory
 
+@AndroidEntryPoint
 class PostFragment : Fragment() {
 
-    private val dependencyContainer = DependencyContainer.getInstance()
     private val viewModel: PostViewModel by viewModels(
-        ownerProducer = ::requireParentFragment,
-        factoryProducer = {
-            ViewModelFactory(dependencyContainer.repository, dependencyContainer.appAuth)
-        }
+        ownerProducer = ::requireParentFragment
     )
 
     override fun onCreateView(

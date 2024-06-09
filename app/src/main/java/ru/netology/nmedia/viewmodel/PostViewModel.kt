@@ -26,6 +26,7 @@ import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
 import java.io.File
+import javax.inject.Inject
 
 
 val empty = Post(
@@ -37,7 +38,7 @@ val empty = Post(
     likedByMe = false
 )
 
-class PostViewModel(
+class PostViewModel @Inject constructor(
     private val repository: PostRepositoryImpl,
     appAuth: AppAuth
 ) : ViewModel() {
