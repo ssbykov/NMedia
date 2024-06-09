@@ -45,18 +45,18 @@ class FCMService : FirebaseMessagingService() {
             }
             when (val action = Action.valueOf(it)) {
                 Action.LIKE -> {
-                    val content = gson.fromJson(message.data[content], Like::class.java)
+                    val notification = gson.fromJson(message.data[content], Like::class.java)
                     handleNotification(
-                        content,
+                        notification,
                         stringRes = R.string.notification_user_liked,
                         fields = action.fields
                     )
                 }
 
                 Action.NEW_POST -> {
-                    val content = gson.fromJson(message.data[content], NewPost::class.java)
+                    val notification = gson.fromJson(message.data[content], NewPost::class.java)
                     handleNotification(
-                        content,
+                        notification,
                         stringRes = R.string.notification_user_new_post,
                         fields = action.fields
                     )
@@ -67,13 +67,15 @@ class FCMService : FirebaseMessagingService() {
             if (recipientId !in it) {
                 return@let
             }
-            val userId = AppAuth.getInstance().authStateFlow.value?.id
-            val content = gson.fromJson(message.data[content], NewNotification::class.java)
-            if (content.recipientId == null && content.recipientId == userId) {
+            val userId = AppAuth.getInstance().authStateFlow.value?.id ?: 0L
+            val notification = gson.fromJson(message.data[content], NewMailing::class.java)
+            if (notification.recipientId == null || notification.recipientId == userId ||
+                notification.recipientId == 0L && userId == 0L
+            ) {
                 handleNotification(
-                    content,
+                    notification,
                     stringRes = R.string.new_notification,
-                    fields = arrayOf("content")
+                    fields = arrayOf(content)
                 )
             } else AppAuth.getInstance().sendPushToken()
         }
@@ -85,7 +87,7 @@ class FCMService : FirebaseMessagingService() {
     }
 
     private fun handleNotification(
-        content: Any,
+        content: NewNotification,
         stringRes: Int,
         smallIconRes: Int = R.drawable.ic_notification,
         fields: Array<String>
