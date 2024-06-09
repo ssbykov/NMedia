@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Post
@@ -41,16 +42,18 @@ val empty = Post(
 
 class PostViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = PostRepositoryImpl(AppDb.getInstance(application).postDao())
+    private val repository = DependencyContainer.getInstance().repository
+
+    private val appAuth = DependencyContainer.getInstance().appAuth
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val data = AppAuth.getInstance().authStateFlow.flatMapLatest { auth ->
+    val data = appAuth.authStateFlow.flatMapLatest { auth ->
         repository.data.map { posts ->
             FeedModel(posts.map { it.copy(ownedByMy = it.authorId == auth?.id) })
         }
     }.asLiveData(Dispatchers.Default)
 
-    val isLogin = AppAuth.getInstance().authStateFlow.map { it != null }.asLiveData()
+    val isLogin = appAuth.authStateFlow.map { it != null }.asLiveData()
 
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 

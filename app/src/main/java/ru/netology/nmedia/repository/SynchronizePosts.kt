@@ -1,6 +1,6 @@
 package ru.netology.nmedia.repository
 
-import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostMapperImpl
@@ -11,13 +11,13 @@ import ru.netology.nmedia.error.UnknownError
 import java.io.IOException
 
 
-suspend fun synchronize(posts: List<PostEntity>?, dao: PostDao) {
+suspend fun synchronize(posts: List<PostEntity>?, dao: PostDao, apiService: ApiService) {
     val postList = posts?.filter { it.state != null && it.visible }
     postList?.forEach { postEntity ->
         try {
             val newPost = when (postEntity.state) {
                 StateType.NEW -> {
-                    val response = Api.retrofitService.save(
+                    val response = apiService.save(
                         PostMapperImpl.toDto(postEntity).copy(id = 0)
                     )
                     if (!response.isSuccessful) throw ApiError(
@@ -32,7 +32,7 @@ suspend fun synchronize(posts: List<PostEntity>?, dao: PostDao) {
 
                 StateType.EDITED -> {
                     val response =
-                        Api.retrofitService.save(PostMapperImpl.toDto(postEntity))
+                        apiService.save(PostMapperImpl.toDto(postEntity))
                     if (!response.isSuccessful) throw ApiError(
                         response.code(),
                         response.message()
@@ -41,7 +41,7 @@ suspend fun synchronize(posts: List<PostEntity>?, dao: PostDao) {
                 }
 
                 StateType.DELETED -> {
-                    val response = Api.retrofitService.removeById(postEntity.id)
+                    val response = apiService.removeById(postEntity.id)
                     if (!response.isSuccessful) throw ApiError(
                         response.code(),
                         response.message()

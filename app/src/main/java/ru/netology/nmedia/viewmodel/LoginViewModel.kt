@@ -10,27 +10,30 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.model.LoginState
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = PostRepositoryImpl(AppDb.getInstance(application).postDao())
+    private val repository = DependencyContainer.getInstance().repository
+
+    private val appAuth = DependencyContainer.getInstance().appAuth
 
     private val _loginState = SingleLiveEvent<LoginState>()
     val loginState: LiveData<LoginState>
         get() = _loginState
 
     val isLogin =
-        AppAuth.getInstance().authSharedFlow.map { it != null }.asLiveData(Dispatchers.Default)
+        appAuth.authSharedFlow.map { it != null }.asLiveData(Dispatchers.Default)
 
     fun authentication(login: String, password: String) = viewModelScope.launch {
         try {
             _loginState.value = LoginState(logining = true)
             val token = repository.authentication(login, password)
             if (token != null) {
-                AppAuth.getInstance().setAuth(token.id, token.token)
+                appAuth.setAuth(token.id, token.token)
             }
             _loginState.value = LoginState()
         } catch (e: Exception) {

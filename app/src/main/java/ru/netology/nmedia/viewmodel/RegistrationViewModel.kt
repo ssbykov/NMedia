@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.db.AppDb
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.model.LoginState
 import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepositoryImpl
@@ -21,7 +22,9 @@ import java.io.File
 
 class RegistrationViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = PostRepositoryImpl(AppDb.getInstance(application).postDao())
+    private val repository = DependencyContainer.getInstance().repository
+
+    private val appAuth = DependencyContainer.getInstance().appAuth
 
     private val _loginState = SingleLiveEvent<LoginState>()
     val loginState: LiveData<LoginState>
@@ -40,9 +43,8 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
         _avatar.value = PhotoModel()
     }
 
-
     val isLogin =
-        AppAuth.getInstance().authSharedFlow.map { it != null }.asLiveData(Dispatchers.Default)
+        appAuth.authSharedFlow.map { it != null }.asLiveData(Dispatchers.Default)
 
     fun registration(login: String, password: String, name: String, avatar: File? = null) =
         viewModelScope.launch {
@@ -54,7 +56,7 @@ class RegistrationViewModel(application: Application) : AndroidViewModel(applica
                     repository.registration(login, password, name)
                 }
                 if (token != null) {
-                    AppAuth.getInstance().setAuth(token.id, token.token)
+                    appAuth.setAuth(token.id, token.token)
                 }
                 _loginState.value = LoginState()
             } catch (e: Exception) {

@@ -12,9 +12,10 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
-import ru.netology.nmedia.api.Api
+import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.Token
@@ -29,7 +30,10 @@ import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
 
-class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
+class PostRepositoryImpl(
+    private val dao: PostDao,
+    private val apiService: ApiService
+) : PostRepository {
 
     val postEntites = dao.getAll()
     override val data = dao.getAllVisible()
@@ -39,10 +43,10 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     override suspend fun getAll() {
         val postEntites = dao.getAllsync()
         val localSynchronizedPosts = postEntites.filter { it.state != StateType.NEW }
-        synchronize(postEntites, dao)
+        synchronize(postEntites, dao, apiService)
         try {
             val response =
-                Api.retrofitService.getNewer(localSynchronizedPosts.firstOrNull()?.id ?: 0)
+                apiService.getNewer(localSynchronizedPosts.firstOrNull()?.id ?: 0)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val newPosts = response.body() ?: throw UnknownError
             insertNewApiPosts(newPosts)
@@ -62,7 +66,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         while (true) {
             emit(0)
             delay(10_000L)
-            val response = Api.retrofitService.getNewer(id)
+            val response = apiService.getNewer(id)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             val newPosts = response.body() ?: throw UnknownError
             insertNewApiPosts(newPosts)
@@ -77,7 +81,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     private suspend fun insertNewApiPosts(newApiPosts: List<Post>) {
         val newLocalPosts = dao.getAllsync().filter { it.state == StateType.NEW }
-        val authorId = AppAuth.getInstance().authStateFlow.value?.id
+        val authorId = DependencyContainer.getInstance().appAuth.authStateFlow.value?.id
         if (newLocalPosts.size == 0) {
             dao.insert(
                 newApiPosts.toEntity()
@@ -102,7 +106,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
         } else {
             postEntity?.copy(state = StateType.DELETED)?.let { dao.insert(it) }
         }
-        synchronize(dao.getAllsync(), dao)
+        synchronize(dao.getAllsync(), dao, apiService)
     }
 
 
@@ -112,9 +116,9 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             try {
                 dao.likeById(post.id)
                 val response = if (post.likedByMe) {
-                    Api.retrofitService.unlikeById(post.id)
+                    apiService.unlikeById(post.id)
                 } else {
-                    Api.retrofitService.likeById(post.id)
+                    apiService.likeById(post.id)
                 }
                 if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             } catch (e: Exception) {
@@ -125,13 +129,13 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
     }
 
     override suspend fun shareById(post: Post) {
-        Api.retrofitService.save(post.copy(shares = post.shares + 1))
+        apiService.save(post.copy(shares = post.shares + 1))
     }
 
 
     override suspend fun save(post: Post) {
         setStateEditedOrNew(post)
-        synchronize(dao.getAllsync(), dao)
+        synchronize(dao.getAllsync(), dao, apiService)
     }
 
     override suspend fun getLastId(): Long {
@@ -140,7 +144,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun authentication(login: String, password: String): Token? {
         try {
-            val response = Api.retrofitService.authentication(login, password)
+            val response = apiService.authentication(login, password)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             return response.body()
         } catch (e: IOException) {
@@ -156,7 +160,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
 
     override suspend fun registration(login: String, password: String, name: String): Token? {
         try {
-            val response = Api.retrofitService.registration(login, password, name)
+            val response = apiService.registration(login, password, name)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
             return response.body()
         } catch (e: IOException) {
@@ -184,7 +188,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
                 "file", upload.name, upload.asRequestBody()
             )
             val response =
-                Api.retrofitService.registerWithPhoto(loginPart, passwordPart, namePart, media)
+                apiService.registerWithPhoto(loginPart, passwordPart, namePart, media)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
 
             return response.body() ?: throw ApiError(response.code(), response.message())
@@ -217,7 +221,7 @@ class PostRepositoryImpl(private val dao: PostDao) : PostRepository {
             val media = MultipartBody.Part.createFormData(
                 "file", upload.name, upload.asRequestBody()
             )
-            val response = Api.retrofitService.upload(media)
+            val response = apiService.upload(media)
             if (!response.isSuccessful) throw ApiError(response.code(), response.message())
 
             return response.body() ?: throw ApiError(response.code(), response.message())

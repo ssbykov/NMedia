@@ -21,6 +21,7 @@ import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.adapter.PostsSetupClickListeners
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.databinding.FragmentFeedBinding
+import ru.netology.nmedia.di.DependencyContainer
 import ru.netology.nmedia.utils.StringArg
 import ru.netology.nmedia.viewmodel.PostViewModel
 
@@ -44,6 +45,8 @@ class FeedFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentFeedBinding.inflate(inflater, container, false)
+
+        val appAuth = DependencyContainer.getInstance().appAuth
 
 
         requireActivity().addMenuProvider(object : MenuProvider {
@@ -77,7 +80,7 @@ class FeedFragment : Fragment() {
                                 .setTitle(getString(R.string.exit_confirmation_title))
                                 .setMessage(getString(R.string.exit_confirmation_message))
                                 .setNeutralButton(getString(R.string.exit)) { _, _ ->
-                                    AppAuth.getInstance().clearAuth()
+                                    appAuth.clearAuth()
                                 }
                                 .setNegativeButton(getString(R.string.no)) { dialog, _ ->
                                     dialog.cancel()
@@ -85,7 +88,7 @@ class FeedFragment : Fragment() {
                                 .show()
                             true
                         } else {
-                            AppAuth.getInstance().clearAuth()
+                            appAuth.clearAuth()
                             true
                         }
                     }
