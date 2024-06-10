@@ -75,9 +75,7 @@ class FCMService : FirebaseMessagingService() {
             }
             val userId = appAuth.authStateFlow.value?.id ?: 0L
             val notification = gson.fromJson(message.data[content], NewMailing::class.java)
-            if (notification.recipientId == null || notification.recipientId == userId ||
-                notification.recipientId == 0L && userId == 0L
-            ) {
+            if (notification.recipientId == null || notification.recipientId == userId) {
                 handleNotification(
                     notification,
                     stringRes = R.string.new_notification,
