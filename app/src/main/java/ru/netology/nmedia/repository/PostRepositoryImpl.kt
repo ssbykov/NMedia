@@ -98,7 +98,7 @@ class PostRepositoryImpl @Inject constructor(
 
     }
 
-    override suspend fun showtAll() {
+    override suspend fun showAll() {
         dao.showAll()
     }
 

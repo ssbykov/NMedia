@@ -106,14 +106,14 @@ class PostViewModel @Inject constructor(
         try {
             _dataState.value = FeedModelState(loading = true)
             repository.getAll()
-            repository.showtAll()
+            repository.showAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
         }
     }
 
-    fun showAll() = viewModelScope.launch { repository.showtAll() }
+    fun showAll() = viewModelScope.launch { repository.showAll() }
 
     fun removeById(id: Long) = viewModelScope.launch {
         try {
