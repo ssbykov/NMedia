@@ -8,11 +8,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
@@ -20,7 +24,6 @@ import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.StateType
-import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.NewPostModel
 import ru.netology.nmedia.model.PhotoModel
@@ -46,18 +49,18 @@ class PostViewModel @Inject constructor(
 ) : ViewModel() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val data = appAuth.authStateFlow.flatMapLatest { auth ->
+    val data: Flow<PagingData<Post>> = appAuth.authStateFlow.flatMapLatest { auth ->
         repository.data.map { posts ->
-            FeedModel(posts.map { it.copy(ownedByMy = it.authorId == auth?.id) })
+            posts.map { it.copy(ownedByMy = it.authorId == auth?.id) }
         }
-    }.asLiveData(Dispatchers.Default)
+    }.flowOn(Dispatchers.Default)
 
     val isLogin = appAuth.authStateFlow.map { it != null }.asLiveData()
 
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 
     val newerCount = postEntites.switchMap {
-        val lastId = it.filter { postEntite -> postEntite.state != StateType.NEW }.firstOrNull()
+        val lastId = it.firstOrNull { postEntity -> postEntity.state != StateType.NEW }
         repository.getNewerCoutn(
             lastId?.id ?: 0
         )
