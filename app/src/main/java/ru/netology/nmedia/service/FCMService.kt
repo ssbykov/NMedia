@@ -12,10 +12,13 @@ import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.auth.AppAuth
+import javax.inject.Inject
 import kotlin.random.Random
 
+@AndroidEntryPoint
 class FCMService : FirebaseMessagingService() {
 
     private val action = "action"
@@ -23,6 +26,9 @@ class FCMService : FirebaseMessagingService() {
     private val channelId = "remote"
     private val recipientId = "recipientId"
     private val gson = Gson()
+
+    @Inject
+    lateinit var appAuth: AppAuth
 
     override fun onCreate() {
         super.onCreate()
@@ -45,18 +51,18 @@ class FCMService : FirebaseMessagingService() {
             }
             when (val action = Action.valueOf(it)) {
                 Action.LIKE -> {
-                    val content = gson.fromJson(message.data[content], Like::class.java)
+                    val notification = gson.fromJson(message.data[content], Like::class.java)
                     handleNotification(
-                        content,
+                        notification,
                         stringRes = R.string.notification_user_liked,
                         fields = action.fields
                     )
                 }
 
                 Action.NEW_POST -> {
-                    val content = gson.fromJson(message.data[content], NewPost::class.java)
+                    val notification = gson.fromJson(message.data[content], NewPost::class.java)
                     handleNotification(
-                        content,
+                        notification,
                         stringRes = R.string.notification_user_new_post,
                         fields = action.fields
                     )
@@ -67,25 +73,25 @@ class FCMService : FirebaseMessagingService() {
             if (recipientId !in it) {
                 return@let
             }
-            val userId = AppAuth.getInstance().authStateFlow.value?.id
-            val content = gson.fromJson(message.data[content], NewNotification::class.java)
-            if (content.recipientId == null && content.recipientId == userId) {
+            val userId = appAuth.authStateFlow.value?.id ?: 0L
+            val notification = gson.fromJson(message.data[content], NewMailing::class.java)
+            if (notification.recipientId == null || notification.recipientId == userId) {
                 handleNotification(
-                    content,
+                    notification,
                     stringRes = R.string.new_notification,
-                    fields = arrayOf("content")
+                    fields = arrayOf(content)
                 )
-            } else AppAuth.getInstance().sendPushToken()
+            } else appAuth.sendPushToken()
         }
 
     }
 
     override fun onNewToken(token: String) {
-        AppAuth.getInstance().sendPushToken(token)
+        appAuth.sendPushToken(token)
     }
 
     private fun handleNotification(
-        content: Any,
+        content: NewNotification,
         stringRes: Int,
         smallIconRes: Int = R.drawable.ic_notification,
         fields: Array<String>

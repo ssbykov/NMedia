@@ -1,14 +1,14 @@
 package ru.netology.nmedia.viewmodel
 
-import android.app.Application
 import android.net.Uri
 import androidx.core.net.toFile
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.catch
@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
-import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Post
@@ -28,6 +27,7 @@ import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.utils.SingleLiveEvent
 import java.io.File
+import javax.inject.Inject
 
 
 val empty = Post(
@@ -39,18 +39,20 @@ val empty = Post(
     likedByMe = false
 )
 
-class PostViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val repository = PostRepositoryImpl(AppDb.getInstance(application).postDao())
+@HiltViewModel
+class PostViewModel @Inject constructor(
+    private val repository: PostRepositoryImpl,
+    appAuth: AppAuth
+) : ViewModel() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val data = AppAuth.getInstance().authStateFlow.flatMapLatest { auth ->
+    val data = appAuth.authStateFlow.flatMapLatest { auth ->
         repository.data.map { posts ->
             FeedModel(posts.map { it.copy(ownedByMy = it.authorId == auth?.id) })
         }
     }.asLiveData(Dispatchers.Default)
 
-    val isLogin = AppAuth.getInstance().authStateFlow.map { it != null }.asLiveData()
+    val isLogin = appAuth.authStateFlow.map { it != null }.asLiveData()
 
     private val postEntites = repository.postEntites.asLiveData(Dispatchers.Default)
 
@@ -104,14 +106,14 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
         try {
             _dataState.value = FeedModelState(loading = true)
             repository.getAll()
-            repository.showtAll()
+            repository.showAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
         }
     }
 
-    fun showAll() = viewModelScope.launch { repository.showtAll() }
+    fun showAll() = viewModelScope.launch { repository.showAll() }
 
     fun removeById(id: Long) = viewModelScope.launch {
         try {

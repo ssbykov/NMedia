@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.Constants
 import ru.netology.nmedia.Constants.KEY_ATTACHMENT
 import ru.netology.nmedia.Constants.KEY_CONTENT
@@ -34,13 +35,12 @@ import ru.netology.nmedia.model.PhotoModel
 import ru.netology.nmedia.utils.AndroidUtils
 import ru.netology.nmedia.viewmodel.PostViewModel
 
+@AndroidEntryPoint
 class NewPostFragment : Fragment() {
-
 
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
     )
-
 
     override fun onCreateView(
         inflater: LayoutInflater,
