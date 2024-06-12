@@ -7,8 +7,11 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.R
 import ru.netology.nmedia.adapter.PostSetupClickListeners
 import ru.netology.nmedia.adapter.PostViewHolder
@@ -31,15 +34,21 @@ class PostFragment : Fragment() {
         val binding = FragmentPostBinding.inflate(inflater, container, false)
         val postId = (arguments?.textPostID ?: return binding.root).toLong()
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            val post = state?.posts?.find { it.id == postId }
-            if (post != null) {
-                PostViewHolder(
-                    binding.postCard,
-                    PostSetupClickListeners(viewModel, this)
-                ).bind(post)
-            }
-        }
+//        lifecycleScope.launch {
+//            viewModel.data.collectLatest {
+//                adapter.submitData(it)
+//            }
+//        }
+//
+//        viewModel.data.observe(viewLifecycleOwner) { state ->
+//            val post = state?.posts?.find { it.id == postId }
+//            if (post != null) {
+//                PostViewHolder(
+//                    binding.postCard,
+//                    PostSetupClickListeners(viewModel, this)
+//                ).bind(post)
+//            }
+//        }
 
         viewModel.dataState.observe(viewLifecycleOwner) { state ->
             binding.progressPost.isVisible = state.loading

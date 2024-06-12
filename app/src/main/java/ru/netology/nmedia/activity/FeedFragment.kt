@@ -11,10 +11,16 @@ import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.paging.LoadState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import ru.netology.nmedia.Constants.KEY_ATTACHMENT
 import ru.netology.nmedia.Constants.KEY_CONTENT
 import ru.netology.nmedia.R
@@ -33,7 +39,6 @@ class FeedFragment : Fragment() {
     lateinit var appAuth: AppAuth
 
     private lateinit var binding: FragmentFeedBinding
-    private var currentSize = 0
 
     private val viewModel: PostViewModel by viewModels(
         ownerProducer = ::requireParentFragment
@@ -74,10 +79,10 @@ class FeedFragment : Fragment() {
                                 "draft",
                                 android.content.Context.MODE_PRIVATE
                             )
-                        val contint = draftPrefs.getString(KEY_CONTENT, "").toString()
+                        val content = draftPrefs.getString(KEY_CONTENT, "").toString()
                         val uri = draftPrefs.getString(KEY_ATTACHMENT, "").toString()
 
-                        return if (contint.isNotEmpty() || !uri.isNullOrBlank() && uri != "null") {
+                        return if (content.isNotEmpty() || !uri.isNullOrBlank() && uri != "null") {
                             MaterialAlertDialogBuilder(binding.root.context)
                                 .setTitle(getString(R.string.exit_confirmation_title))
                                 .setMessage(getString(R.string.exit_confirmation_message))
@@ -116,64 +121,72 @@ class FeedFragment : Fragment() {
         val adapter = PostsAdapter(PostsSetupClickListeners(viewModel, this))
         binding.list.adapter = adapter
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            val newSize = state?.posts?.size ?: 0
 
-            adapter.submitList(state.posts) {
-                if (currentSize in 1..<newSize) {
-                    binding.list.smoothScrollToPosition(0)
-                    currentSize = newSize
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(
+                Lifecycle.State.STARTED
+            ) {
+                viewModel.data.collectLatest {
+                    adapter.submitData(it)
                 }
             }
-            binding.emptyTest.isVisible = state.posts.isEmpty()
         }
 
-        viewModel.newerCount.observe(viewLifecycleOwner) {
-            if (it != null && it > 0) {
-                binding.newPosts.text = getString(R.string.new_posts, it.toString())
-                binding.newPosts.visibility = View.VISIBLE
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(
+                Lifecycle.State.STARTED
+            ) {
+                adapter.loadStateFlow.collectLatest {
+                    binding.swiper.isRefreshing = it.refresh is LoadState.Loading
+                            || it.append is LoadState.Loading
+                            || it.prepend is LoadState.Loading
+                }
+            }
+        }
+
+            viewModel.newerCount.observe(viewLifecycleOwner) {
+                if (it != null && it > 0) {
+                    binding.newPosts.text = getString(R.string.new_posts, it.toString())
+                    binding.newPosts.visibility = View.VISIBLE
+                }
+
             }
 
-        }
+            viewModel.dataState.observe(viewLifecycleOwner) { state ->
+                binding.progress.isVisible = state.loading
+                if (state.error) {
+                    Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.retry_loading) {
+                            viewModel.loadPosts()
+                        }
+                        .setAnchorView(binding.add)
+                        .show()
+                }
+            }
 
-        viewModel.dataState.observe(viewLifecycleOwner) { state ->
-            binding.progress.isVisible = state.loading
-            if (state.error) {
-                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                    .setAction(R.string.retry_loading) {
-                        viewModel.loadPosts()
+            binding.swiper.setOnRefreshListener {
+                adapter.refresh()
+                binding.swiper.isRefreshing = false
+                binding.newPosts.visibility = View.GONE
+            }
+
+            binding.newPosts.setOnClickListener {
+                viewModel.showAll()
+                binding.newPosts.visibility = View.GONE
+            }
+
+
+            binding.add.setOnClickListener {
+                viewModel.isLogin.observe(viewLifecycleOwner) { state ->
+                    if (!state) {
+                        findNavController().navigate(R.id.action_feedFragment_to_loginFragment)
+                    } else {
+                        viewModel.dropPhoto()
+                        findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
                     }
-                    .setAnchorView(binding.add)
-                    .show()
-            }
-        }
-
-        binding.swiper.setOnRefreshListener {
-            currentSize = adapter.currentList.size
-            viewModel.loadPosts()
-            binding.swiper.isRefreshing = false
-            binding.newPosts.visibility = View.GONE
-        }
-
-        binding.newPosts.setOnClickListener {
-            currentSize = adapter.currentList.size
-            viewModel.showAll()
-            binding.newPosts.visibility = View.GONE
-        }
-
-
-        binding.add.setOnClickListener {
-            viewModel.isLogin.observe(viewLifecycleOwner) { state ->
-                if (!state) {
-                    findNavController().navigate(R.id.action_feedFragment_to_loginFragment)
-                } else {
-                    currentSize = adapter.currentList.size
-                    viewModel.dropPhoto()
-                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
                 }
             }
-        }
 
+        }
     }
-}
 
