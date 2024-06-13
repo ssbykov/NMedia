@@ -1,7 +1,9 @@
 package ru.netology.nmedia.repository
 
+import androidx.lifecycle.asLiveData
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
+import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -20,10 +22,8 @@ import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.Token
-import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostMapperImpl
 import ru.netology.nmedia.entity.StateType
-import ru.netology.nmedia.entity.toDto
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
 import ru.netology.nmedia.error.AppError
@@ -42,12 +42,17 @@ class PostRepositoryImpl @Inject constructor(
 
     val postEntites = dao.getAll()
     override val data = Pager(
-        config = PagingConfig(pageSize = 10, enablePlaceholders = false),
-        pagingSourceFactory = { PostPagingSource(apiService) }
-    ).flow
+        config = PagingConfig(pageSize = 10, enablePlaceholders = false, maxSize = 30),
+        pagingSourceFactory = { dao.getAllSource() }
+    ).flow.map { pagingData ->
+        pagingData
+            .map { postEntity ->
+                PostMapperImpl.toDto(postEntity)
+            }
+    }
 
     override suspend fun getAll() {
-        val postEntites = dao.getAllsync()
+        val postEntites = dao.getAllSync()
         val localSynchronizedPosts = postEntites.filter { it.state != StateType.NEW }
         synchronize(postEntites, dao, apiService)
         try {
@@ -86,7 +91,7 @@ class PostRepositoryImpl @Inject constructor(
         .flowOn(Dispatchers.Default)
 
     private suspend fun insertNewApiPosts(newApiPosts: List<Post>) {
-        val newLocalPosts = dao.getAllsync().filter { it.state == StateType.NEW }
+        val newLocalPosts = dao.getAllSync().filter { it.state == StateType.NEW }
         val authorId = appAuth.authStateFlow.value?.id
         if (newLocalPosts.size == 0) {
             dao.insert(
@@ -112,7 +117,7 @@ class PostRepositoryImpl @Inject constructor(
         } else {
             postEntity?.copy(state = StateType.DELETED)?.let { dao.insert(it) }
         }
-        synchronize(dao.getAllsync(), dao, apiService)
+        synchronize(dao.getAllSync(), dao, apiService)
     }
 
 
@@ -141,7 +146,7 @@ class PostRepositoryImpl @Inject constructor(
 
     override suspend fun save(post: Post) {
         setStateEditedOrNew(post)
-        synchronize(dao.getAllsync(), dao, apiService)
+        synchronize(dao.getAllSync(), dao, apiService)
     }
 
     override suspend fun getLastId(): Long {

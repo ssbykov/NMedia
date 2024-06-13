@@ -9,6 +9,7 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -54,6 +55,7 @@ class PostViewModel @Inject constructor(
             posts.map { it.copy(ownedByMy = it.authorId == auth?.id) }
         }
     }.flowOn(Dispatchers.Default)
+        .cachedIn(viewModelScope)
 
     val isLogin = appAuth.authStateFlow.map { it != null }.asLiveData()
 
