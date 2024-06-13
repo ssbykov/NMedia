@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.Token
+import ru.netology.nmedia.entity.PostEntity
 import java.io.File
 
 interface PostRepository {
@@ -14,6 +15,7 @@ interface PostRepository {
     suspend fun likeById(post: Post)
     suspend fun shareById(post: Post)
     suspend fun removeById(id: Long)
+    suspend fun getById(id: Long): PostEntity?
     suspend fun save(post: Post)
     suspend fun upload(upload: File): Media?
     suspend fun getLastId(): Long
@@ -26,5 +28,5 @@ interface PostRepository {
         upload: File
     ): Token?
 
-    fun getNewerCoutn(id: Long): Flow<Int>
+    fun getNewerCount(id: Long): Flow<Int>
 }

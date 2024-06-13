@@ -24,6 +24,7 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.entity.PostMapperImpl
 import ru.netology.nmedia.entity.StateType
 import ru.netology.nmedia.model.FeedModelState
 import ru.netology.nmedia.model.NewPostModel
@@ -63,7 +64,7 @@ class PostViewModel @Inject constructor(
 
     val newerCount = postEntites.switchMap {
         val lastId = it.firstOrNull { postEntity -> postEntity.state != StateType.NEW }
-        repository.getNewerCoutn(
+        repository.getNewerCount(
             lastId?.id ?: 0
         )
             .catch {
@@ -138,6 +139,14 @@ class PostViewModel @Inject constructor(
         } catch (e: Exception) {
             _dataState.value = FeedModelState(error = true)
         }
+    }
+
+    private val _postById = SingleLiveEvent<Post>()
+    val postById: LiveData<Post>
+        get() = _postById
+
+    fun getById(id: Long) = viewModelScope.launch {
+        _postById.value = PostMapperImpl.toDto(requireNotNull(repository.getById(id)))
     }
 
     fun changeContentAndSave(content: String, attachment: Attachment?) {

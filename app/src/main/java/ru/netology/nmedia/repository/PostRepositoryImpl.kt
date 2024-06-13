@@ -1,6 +1,5 @@
 package ru.netology.nmedia.repository
 
-import androidx.lifecycle.asLiveData
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.map
@@ -22,6 +21,7 @@ import ru.netology.nmedia.dao.PostDao
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.Token
+import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostMapperImpl
 import ru.netology.nmedia.entity.StateType
 import ru.netology.nmedia.entity.toEntity
@@ -72,7 +72,7 @@ class PostRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getNewerCoutn(id: Long): Flow<Int> = flow {
+    override fun getNewerCount(id: Long): Flow<Int> = flow {
 
         while (true) {
             emit(0)
@@ -118,6 +118,10 @@ class PostRepositoryImpl @Inject constructor(
             postEntity?.copy(state = StateType.DELETED)?.let { dao.insert(it) }
         }
         synchronize(dao.getAllSync(), dao, apiService)
+    }
+
+    override suspend fun getById(id: Long): PostEntity? {
+        return dao.getById(id)
     }
 
 

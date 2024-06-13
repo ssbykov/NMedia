@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.paging.filter
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
@@ -32,9 +31,9 @@ class PostFragment : Fragment() {
         val binding = FragmentPostBinding.inflate(inflater, container, false)
         val postId = (arguments?.textPostID ?: return binding.root).toLong()
 
+        viewModel.getById(postId)
 
-        viewModel.data.observe(viewLifecycleOwner) { state ->
-            val post = state?.filter { it.id == postId }
+        viewModel.postById.observe(viewLifecycleOwner) { post ->
             if (post != null) {
                 PostViewHolder(
                     binding.postCard,
