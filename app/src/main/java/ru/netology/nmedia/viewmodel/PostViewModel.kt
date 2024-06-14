@@ -47,7 +47,7 @@ val empty = Post(
 @HiltViewModel
 class PostViewModel @Inject constructor(
     private val repository: PostRepositoryImpl,
-    appAuth: AppAuth
+    private val appAuth: AppAuth
 ) : ViewModel() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -175,6 +175,9 @@ class PostViewModel @Inject constructor(
                         repository.save(
                             newPost.copy(
                                 id = if (it.id == 0L) repository.getLastId() + 1 else it.id,
+                                authorId = if (it.authorId == 0L) {
+                                    appAuth.authStateFlow.value?.id ?: 0
+                                } else it.authorId,
                                 attachment = newAttachment
                             )
                         )
