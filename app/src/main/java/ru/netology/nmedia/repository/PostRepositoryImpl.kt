@@ -95,7 +95,7 @@ class PostRepositoryImpl @Inject constructor(
     private suspend fun insertNewApiPosts(newApiPosts: List<Post>) {
         val newLocalPosts = dao.getAllSync().filter { it.state == StateType.NEW }
         val authorId = appAuth.authStateFlow.value?.id
-        if (newLocalPosts.size == 0) {
+        if (newLocalPosts.isEmpty()) {
             dao.insert(
                 newApiPosts.toEntity()
                     .map {
