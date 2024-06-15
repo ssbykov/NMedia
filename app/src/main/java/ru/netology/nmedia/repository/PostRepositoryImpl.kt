@@ -1,5 +1,6 @@
 package ru.netology.nmedia.repository
 
+import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.filter
@@ -42,9 +43,11 @@ class PostRepositoryImpl @Inject constructor(
     lateinit var appAuth: AppAuth
 
     val postEntites = dao.getAll()
+    @OptIn(ExperimentalPagingApi::class)
     override val data = Pager(
         config = PagingConfig(pageSize = 10, enablePlaceholders = false, maxSize = 30),
-        pagingSourceFactory = { dao.getAllVisibleSource() }
+        pagingSourceFactory = { dao.getPagingSource() },
+        remoteMediator = PostRemoteMediator(apiService = apiService, postDao = dao)
     ).flow.map { pagingData ->
         pagingData
             .filter { it.state != StateType.DELETED }
