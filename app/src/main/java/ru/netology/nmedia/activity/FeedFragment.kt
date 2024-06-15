@@ -126,7 +126,7 @@ class FeedFragment : Fragment() {
             lifecycle.repeatOnLifecycle(
                 Lifecycle.State.STARTED
             ) {
-                viewModel.data.collectLatest {
+                viewModel.data.collect {
                     adapter.submitData(it)
                 }
             }
@@ -144,13 +144,13 @@ class FeedFragment : Fragment() {
             }
         }
 
-            viewModel.newerCount.observe(viewLifecycleOwner) {
-                if (it != null && it > 0) {
-                    binding.newPosts.text = getString(R.string.new_posts, it.toString())
-                    binding.newPosts.visibility = View.VISIBLE
-                }
-
-            }
+//            viewModel.newerCount.observe(viewLifecycleOwner) {
+//                if (it != null && it > 0) {
+//                    binding.newPosts.text = getString(R.string.new_posts, it.toString())
+//                    binding.newPosts.visibility = View.VISIBLE
+//                }
+//
+//            }
 
             viewModel.dataState.observe(viewLifecycleOwner) { state ->
                 binding.progress.isVisible = state.loading
