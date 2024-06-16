@@ -126,7 +126,7 @@ class FeedFragment : Fragment() {
             lifecycle.repeatOnLifecycle(
                 Lifecycle.State.STARTED
             ) {
-                viewModel.data.collect {
+                viewModel.data.collectLatest {
                     adapter.submitData(it)
                 }
             }

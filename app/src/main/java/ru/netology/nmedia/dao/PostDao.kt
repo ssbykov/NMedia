@@ -65,4 +65,7 @@ interface PostDao {
         """SELECT MAX(id) FROM PostEntity;"""
     )
     suspend fun getLastId(): Long?
+
+    @Query("DELETE FROM PostEntity")
+    suspend fun clear()
 }

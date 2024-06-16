@@ -20,6 +20,8 @@ import okio.IOException
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dao.PostRemoteKeyDao
+import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.Token
@@ -36,18 +38,26 @@ import javax.inject.Inject
 
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    postRemoteKeyDao: PostRemoteKeyDao,
+    appDb: AppDb
 ) : PostRepository {
 
     @Inject
     lateinit var appAuth: AppAuth
 
     val postEntites = dao.getAll()
+
     @OptIn(ExperimentalPagingApi::class)
     override val data = Pager(
         config = PagingConfig(pageSize = 10, enablePlaceholders = false, maxSize = 30),
         pagingSourceFactory = { dao.getPagingSource() },
-        remoteMediator = PostRemoteMediator(apiService = apiService, postDao = dao)
+        remoteMediator = PostRemoteMediator(
+            apiService = apiService,
+            postDao = dao,
+            postRemoteKeyDao = postRemoteKeyDao,
+            appDb = appDb
+        )
     ).flow.map { pagingData ->
         pagingData
             .filter { it.state != StateType.DELETED }
@@ -59,7 +69,7 @@ class PostRepositoryImpl @Inject constructor(
     override suspend fun getAll() {
         val postEntites = dao.getAllSync()
         val localSynchronizedPosts = postEntites.filter { it.state != StateType.NEW }
-        synchronize(postEntites, dao, apiService)
+//        synchronize(postEntites, dao, apiService)
         try {
             val response =
                 apiService.getNewer(localSynchronizedPosts.firstOrNull()?.id ?: 0)
@@ -122,7 +132,7 @@ class PostRepositoryImpl @Inject constructor(
         } else {
             postEntity?.copy(state = StateType.DELETED)?.let { dao.insert(it) }
         }
-        synchronize(dao.getAllSync(), dao, apiService)
+//        synchronize(dao.getAllSync(), dao, apiService)
     }
 
     override suspend fun getById(id: Long): PostEntity? {
@@ -155,7 +165,7 @@ class PostRepositoryImpl @Inject constructor(
 
     override suspend fun save(post: Post) {
         setStateEditedOrNew(post)
-        synchronize(dao.getAllSync(), dao, apiService)
+//        synchronize(dao.getAllSync(), dao, apiService)
     }
 
     override suspend fun getLastId(): Long {
