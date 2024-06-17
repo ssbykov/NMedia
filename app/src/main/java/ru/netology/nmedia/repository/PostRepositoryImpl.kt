@@ -132,7 +132,7 @@ class PostRepositoryImpl @Inject constructor(
         } else {
             postEntity?.copy(state = StateType.DELETED)?.let { dao.insert(it) }
         }
-//        synchronize(dao.getAllSync(), dao, apiService)
+        synchronize(dao.getAllSync(), dao, apiService)
     }
 
     override suspend fun getById(id: Long): PostEntity? {
@@ -165,7 +165,7 @@ class PostRepositoryImpl @Inject constructor(
 
     override suspend fun save(post: Post) {
         setStateEditedOrNew(post)
-//        synchronize(dao.getAllSync(), dao, apiService)
+        synchronize(dao.getAllSync(), dao, apiService)
     }
 
     override suspend fun getLastId(): Long {

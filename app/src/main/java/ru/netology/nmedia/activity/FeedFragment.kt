@@ -132,6 +132,7 @@ class FeedFragment : Fragment() {
             }
         }
 
+
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(
                 Lifecycle.State.STARTED
@@ -139,7 +140,6 @@ class FeedFragment : Fragment() {
                 adapter.loadStateFlow.collectLatest {
                     binding.swiper.isRefreshing = it.refresh is LoadState.Loading
                             || it.append is LoadState.Loading
-                            || it.prepend is LoadState.Loading
                 }
             }
         }
@@ -152,17 +152,19 @@ class FeedFragment : Fragment() {
 //
 //            }
 
-            viewModel.dataState.observe(viewLifecycleOwner) { state ->
-                binding.progress.isVisible = state.loading
-                if (state.error) {
-                    Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                        .setAction(R.string.retry_loading) {
-                            viewModel.loadPosts()
-                        }
-                        .setAnchorView(binding.add)
-                        .show()
-                }
-            }
+//            adapter.notifyDataSetChanged()
+
+//            viewModel.dataState.observe(viewLifecycleOwner) { state ->
+//                binding.progress.isVisible = state.loading
+//                if (state.error) {
+//                    Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+//                        .setAction(R.string.retry_loading) {
+//                            viewModel.loadPosts()
+//                        }
+//                        .setAnchorView(binding.add)
+//                        .show()
+//                }
+//            }
 
             binding.swiper.setOnRefreshListener {
                 adapter.refresh()

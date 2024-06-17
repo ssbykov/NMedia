@@ -2,6 +2,7 @@ package ru.netology.nmedia.repository
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
+import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
@@ -30,13 +31,14 @@ class PostRemoteMediator(
             val pageSize = state.config.pageSize
             val response = when (loadType) {
                 LoadType.REFRESH -> {
-                    apiService.getLatest(pageSize)
+                    val id = postRemoteKeyDao.max() ?: 0L
+                    if (id == 0L) {
+                        apiService.getLatest(pageSize)
+                    } else {
+                        apiService.getAfter(id, pageSize)
+                    }
                 }
-
-                LoadType.PREPEND -> {
-                    val id = postRemoteKeyDao.max() ?: return MediatorResult.Success(false)
-                    apiService.getAfter(id, pageSize)
-                }
+                LoadType.PREPEND -> return MediatorResult.Success(false)
 
                 LoadType.APPEND -> {
                     val id = postRemoteKeyDao.min() ?: return MediatorResult.Success(false)
@@ -53,30 +55,15 @@ class PostRemoteMediator(
             appDb.withTransaction {
                 when (loadType) {
                     LoadType.REFRESH -> {
-                        postDao.clear()
-                        postRemoteKeyDao.insert(
-                            listOf(
-                                PostRemoteKeyEntity(
-                                    PostRemoteKeyEntity.KeyType.AFTER,
-                                    body.first().id
-                                ),
-                                PostRemoteKeyEntity(
-                                    PostRemoteKeyEntity.KeyType.BEFORE,
-                                    body.last().id
-                                )
-                            )
-                        )
-                    }
-
-                    LoadType.PREPEND -> {
                         postRemoteKeyDao.insert(
                             PostRemoteKeyEntity(
                                 PostRemoteKeyEntity.KeyType.AFTER,
                                 body.first().id
                             )
                         )
-
                     }
+
+                    LoadType.PREPEND -> {}
 
                     LoadType.APPEND -> {
                         postRemoteKeyDao.insert(

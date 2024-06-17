@@ -97,7 +97,7 @@ class PostViewModel @Inject constructor(
     }
 
     init {
-        loadPosts()
+//        loadPosts()
     }
 
     fun edit(post: Post) {
