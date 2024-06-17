@@ -8,7 +8,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -17,7 +16,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -124,9 +122,9 @@ class FeedFragment : Fragment() {
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(
-                Lifecycle.State.STARTED
+                Lifecycle.State.CREATED
             ) {
-                viewModel.data.collectLatest {
+                viewModel.data.collect {
                     adapter.submitData(it)
                 }
             }
@@ -135,7 +133,7 @@ class FeedFragment : Fragment() {
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(
-                Lifecycle.State.STARTED
+                Lifecycle.State.CREATED
             ) {
                 adapter.loadStateFlow.collectLatest {
                     binding.swiper.isRefreshing = it.refresh is LoadState.Loading
@@ -143,16 +141,6 @@ class FeedFragment : Fragment() {
                 }
             }
         }
-
-//            viewModel.newerCount.observe(viewLifecycleOwner) {
-//                if (it != null && it > 0) {
-//                    binding.newPosts.text = getString(R.string.new_posts, it.toString())
-//                    binding.newPosts.visibility = View.VISIBLE
-//                }
-//
-//            }
-
-//            adapter.notifyDataSetChanged()
 
 //            viewModel.dataState.observe(viewLifecycleOwner) { state ->
 //                binding.progress.isVisible = state.loading
@@ -166,29 +154,29 @@ class FeedFragment : Fragment() {
 //                }
 //            }
 
-            binding.swiper.setOnRefreshListener {
-                adapter.refresh()
-                binding.swiper.isRefreshing = false
-                binding.newPosts.visibility = View.GONE
-            }
+        binding.swiper.setOnRefreshListener {
+            adapter.refresh()
+            binding.swiper.isRefreshing = false
+            binding.newPosts.visibility = View.GONE
+        }
 
-            binding.newPosts.setOnClickListener {
-                viewModel.showAll()
-                binding.newPosts.visibility = View.GONE
-            }
+        binding.newPosts.setOnClickListener {
+            viewModel.showAll()
+            binding.newPosts.visibility = View.GONE
+        }
 
 
-            binding.add.setOnClickListener {
-                viewModel.isLogin.observe(viewLifecycleOwner) { state ->
-                    if (!state) {
-                        findNavController().navigate(R.id.action_feedFragment_to_loginFragment)
-                    } else {
-                        viewModel.dropPhoto()
-                        findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
-                    }
+        binding.add.setOnClickListener {
+            viewModel.isLogin.observe(viewLifecycleOwner) { state ->
+                if (!state) {
+                    findNavController().navigate(R.id.action_feedFragment_to_loginFragment)
+                } else {
+                    viewModel.dropPhoto()
+                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
                 }
             }
-
         }
+
     }
+}
 
