@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -16,6 +17,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.paging.LoadState
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -120,7 +122,7 @@ class FeedFragment : Fragment() {
         binding.list.adapter = adapter
 
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(
                 Lifecycle.State.CREATED
             ) {
@@ -131,7 +133,7 @@ class FeedFragment : Fragment() {
         }
 
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(
                 Lifecycle.State.CREATED
             ) {
@@ -142,17 +144,17 @@ class FeedFragment : Fragment() {
             }
         }
 
-//            viewModel.dataState.observe(viewLifecycleOwner) { state ->
-//                binding.progress.isVisible = state.loading
-//                if (state.error) {
-//                    Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-//                        .setAction(R.string.retry_loading) {
-//                            viewModel.loadPosts()
-//                        }
-//                        .setAnchorView(binding.add)
-//                        .show()
-//                }
-//            }
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+            binding.progress.isVisible = state.loading
+            if (state.error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) {
+                        viewModel.loadPosts()
+                    }
+                    .setAnchorView(binding.add)
+                    .show()
+            }
+        }
 
         binding.swiper.setOnRefreshListener {
             adapter.refresh()

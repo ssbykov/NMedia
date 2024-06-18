@@ -96,10 +96,6 @@ class PostViewModel @Inject constructor(
         _photo.value = PhotoModel()
     }
 
-    init {
-//        loadPosts()
-    }
-
     fun edit(post: Post) {
         edited.value = post
     }
@@ -133,7 +129,9 @@ class PostViewModel @Inject constructor(
 
     fun likeById(post: Post) = viewModelScope.launch {
         try {
+            if (_dataState.value != FeedModelState() && _dataState.value != null) return@launch
             _dataState.value = FeedModelState(loading = true)
+            repository.synchronizeById(post.id)
             repository.likeById(post)
             _dataState.value = FeedModelState()
         } catch (e: Exception) {

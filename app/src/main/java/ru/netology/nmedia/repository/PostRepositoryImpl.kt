@@ -50,7 +50,7 @@ class PostRepositoryImpl @Inject constructor(
 
     @OptIn(ExperimentalPagingApi::class)
     override val data = Pager(
-        config = PagingConfig(pageSize = 10, enablePlaceholders = false, maxSize = 30),
+        config = PagingConfig(pageSize = 10, maxSize = 30),
         pagingSourceFactory = { dao.getPagingSource() },
         remoteMediator = PostRemoteMediator(
             apiService = apiService,
@@ -263,6 +263,13 @@ class PostRepositoryImpl @Inject constructor(
 
         } catch (e: Exception) {
             throw UnknownError
+        }
+    }
+
+    override suspend fun synchronizeById(id: Long) {
+        val postEntity = getById(id)
+        if (postEntity != null) {
+            synchronize(listOf(postEntity), dao, apiService)
         }
     }
 

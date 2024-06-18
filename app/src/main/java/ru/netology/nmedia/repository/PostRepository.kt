@@ -29,4 +29,5 @@ interface PostRepository {
     ): Token?
 
     fun getNewerCount(id: Long): Flow<Int>
+    suspend fun synchronizeById(id: Long)
 }
