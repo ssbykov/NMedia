@@ -2,7 +2,6 @@ package ru.netology.nmedia.repository
 
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
-import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import androidx.room.withTransaction
@@ -31,13 +30,17 @@ class PostRemoteMediator(
             val pageSize = state.config.pageSize
             val response = when (loadType) {
                 LoadType.REFRESH -> {
-                    val id = postRemoteKeyDao.max() ?: 0L
-                    if (id == 0L) {
-                        apiService.getLatest(pageSize)
+                    synchronize(postDao.getAllSync(), postDao, apiService)
+                    val maxId = postRemoteKeyDao.max() ?: 0L
+                    val difIds = (postDao.getLastId() ?: 0) - maxId
+                    val loadSize = if (difIds < pageSize) pageSize else difIds.toInt()
+                    if (maxId == 0L) {
+                        apiService.getLatest(loadSize)
                     } else {
-                        apiService.getAfter(id, pageSize)
+                        apiService.getAfter(maxId, loadSize)
                     }
                 }
+
                 LoadType.PREPEND -> return MediatorResult.Success(false)
 
                 LoadType.APPEND -> {
