@@ -39,15 +39,9 @@ import javax.inject.Inject
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
     private val apiService: ApiService,
-    postRemoteKeyDao: PostRemoteKeyDao,
-    appDb: AppDb
+    private val appAuth: AppAuth,
+    pager: Pager<Int, PostEntity>
 ) : PostRepository {
-
-    @Inject
-    lateinit var appAuth: AppAuth
-
-    @Inject
-    lateinit var pager: Pager<Int, PostEntity>
 
     val postEntites = dao.getAll()
 

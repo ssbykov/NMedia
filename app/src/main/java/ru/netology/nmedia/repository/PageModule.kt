@@ -38,24 +38,17 @@ class PageModule {
         appDb = appDb
     )
 
-    @Provides
-    @Singleton
-    fun providerPagingSource(postDao: PostDao) = postDao.getPagingSource()
-
-    @Provides
-    @Singleton
-    fun providerPagingSourceFactory(pagingSource: PagingSource<Int, PostEntity>) = { pagingSource }
 
     @OptIn(ExperimentalPagingApi::class)
     @Singleton
     @Provides
     fun providerPager(
         pagingConfig: PagingConfig,
-        pagingSourceFactory: PagingSourceFactory<Int, PostEntity>,
+        postDao: PostDao,
         postRemoteMediator: PostRemoteMediator
     ) = Pager(
         config = pagingConfig,
-        pagingSourceFactory = pagingSourceFactory,
+        pagingSourceFactory = { postDao.getPagingSource() },
         remoteMediator = postRemoteMediator
     )
 }
