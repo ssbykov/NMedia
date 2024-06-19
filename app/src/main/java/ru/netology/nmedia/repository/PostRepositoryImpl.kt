@@ -46,19 +46,12 @@ class PostRepositoryImpl @Inject constructor(
     @Inject
     lateinit var appAuth: AppAuth
 
+    @Inject
+    lateinit var pager: Pager<Int, PostEntity>
+
     val postEntites = dao.getAll()
 
-    @OptIn(ExperimentalPagingApi::class)
-    override val data = Pager(
-        config = PagingConfig(pageSize = 10, maxSize = 30),
-        pagingSourceFactory = { dao.getPagingSource() },
-        remoteMediator = PostRemoteMediator(
-            apiService = apiService,
-            postDao = dao,
-            postRemoteKeyDao = postRemoteKeyDao,
-            appDb = appDb
-        )
-    ).flow.map { pagingData ->
+    override val data = pager.flow.map { pagingData ->
         pagingData
             .filter { it.state != StateType.DELETED }
             .map { postEntity ->
