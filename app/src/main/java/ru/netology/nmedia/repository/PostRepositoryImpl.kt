@@ -126,7 +126,22 @@ class PostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun shareById(post: Post) {
-        apiService.save(post.copy(shares = post.shares + 1))
+        val postEntity = dao.getById(post.id)
+        if (postEntity?.state == null) {
+            try {
+                val response = apiService.save(post.copy(shares = post.shares + 1))
+                if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+                dao.insert(PostMapperImpl.fromDto(requireNotNull(response.body())))
+            } catch (e: IOException) {
+                throw NetworkError
+
+            } catch (e: ApiError) {
+                throw e
+
+            } catch (e: Exception) {
+                throw UnknownError
+            }
+        }
     }
 
 

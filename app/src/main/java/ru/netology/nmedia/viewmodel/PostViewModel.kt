@@ -192,18 +192,15 @@ class PostViewModel @Inject constructor(
     }
 
 
-//
-//    fun shareById(post: Post) = viewModelScope.launch {
-//        _data.value = _data.value?.copy(load = true)
-//        val result = repository.shareById(post)
-//        val posts = _data.value?.posts.orEmpty().map {
-//            if (it.id == result.id) result else it
-//        }
-//        _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
-//    }
-//
-//
-
-//
-
+    fun shareById(post: Post) = viewModelScope.launch {
+        try {
+            if (_dataState.value != FeedModelState() && _dataState.value != null) return@launch
+            _dataState.value = FeedModelState(loading = true)
+            repository.synchronizeById(post.id)
+            repository.shareById(post)
+            _dataState.value = FeedModelState()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
+    }
 }
