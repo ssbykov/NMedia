@@ -104,10 +104,10 @@ class PostViewModel @Inject constructor(
         edited.value = empty
     }
 
-    fun loadPosts() = viewModelScope.launch {
+    fun synchronizePosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
-            repository.getAll()
+            repository.synchronizePosts()
             repository.showAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {

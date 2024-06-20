@@ -10,7 +10,7 @@ import java.io.File
 
 interface PostRepository {
     val data: Flow<PagingData<Post>>
-    suspend fun getAll()
+    suspend fun synchronizePosts()
     suspend fun showAll()
     suspend fun likeById(post: Post)
     suspend fun shareById(post: Post)

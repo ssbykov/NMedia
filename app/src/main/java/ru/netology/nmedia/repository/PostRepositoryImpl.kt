@@ -1,8 +1,6 @@
 package ru.netology.nmedia.repository
 
-import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.filter
 import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
@@ -20,8 +18,6 @@ import okio.IOException
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
-import ru.netology.nmedia.dao.PostRemoteKeyDao
-import ru.netology.nmedia.db.AppDb
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.Token
@@ -53,25 +49,9 @@ class PostRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun getAll() {
+    override suspend fun synchronizePosts() {
         val postEntites = dao.getAllSync()
-        val localSynchronizedPosts = postEntites.filter { it.state != StateType.NEW }
-//        synchronize(postEntites, dao, apiService)
-        try {
-            val response =
-                apiService.getNewer(localSynchronizedPosts.firstOrNull()?.id ?: 0)
-            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
-            val newPosts = response.body() ?: throw UnknownError
-            insertNewApiPosts(newPosts)
-        } catch (e: IOException) {
-            throw NetworkError
-
-        } catch (e: ApiError) {
-            throw e
-
-        } catch (e: Exception) {
-            throw UnknownError
-        }
+        synchronize(postEntites, dao, apiService)
     }
 
     override fun getNewerCount(id: Long): Flow<Int> = flow {
