@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.Attachment
 import ru.netology.nmedia.dto.AttachmentType
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.entity.PostMapperImpl
 import ru.netology.nmedia.entity.StateType
@@ -51,9 +52,13 @@ class PostViewModel @Inject constructor(
 ) : ViewModel() {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val data: Flow<PagingData<Post>> = appAuth.authStateFlow.flatMapLatest { auth ->
-        repository.data.map { posts ->
-            posts.map { it.copy(ownedByMy = it.authorId == auth?.id) }
+    val data: Flow<PagingData<FeedItem>> = appAuth.authStateFlow.flatMapLatest { auth ->
+        repository.data.map { pagingData ->
+            pagingData.map { feedItem ->
+                if (feedItem is Post) {
+                    feedItem.copy(ownedByMy = feedItem.authorId == auth?.id)
+                } else feedItem
+            }
         }
     }.flowOn(Dispatchers.Default)
         .cachedIn(viewModelScope)

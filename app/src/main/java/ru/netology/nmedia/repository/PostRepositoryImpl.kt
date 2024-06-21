@@ -1,7 +1,9 @@
 package ru.netology.nmedia.repository
 
 import androidx.paging.Pager
+import androidx.paging.PagingData
 import androidx.paging.filter
+import androidx.paging.insertSeparators
 import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -18,6 +20,8 @@ import okio.IOException
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
+import ru.netology.nmedia.dto.Ad
+import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
 import ru.netology.nmedia.dto.Token
@@ -31,6 +35,7 @@ import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
 import javax.inject.Inject
+import kotlin.random.Random
 
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
@@ -41,11 +46,14 @@ class PostRepositoryImpl @Inject constructor(
 
     val postEntites = dao.getAll()
 
-    override val data = pager.flow.map { pagingData ->
+    override val data: Flow<PagingData<FeedItem>> = pager.flow.map { pagingData ->
         pagingData
             .filter { it.state != StateType.DELETED }
-            .map { postEntity ->
-                PostMapperImpl.toDto(postEntity)
+            .map(PostMapperImpl::toDto)
+            .insertSeparators { previous, _ ->
+                if (previous?.id?.rem(5) == 0L) {
+                    Ad(Random.nextLong(), "figma.jpg")
+                } else null
             }
     }
 

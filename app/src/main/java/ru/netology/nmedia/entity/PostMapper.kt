@@ -25,6 +25,8 @@ fun List<PostEntity>.toDto(): List<Post> =
 
 fun List<Post>.toEntity(): List<PostEntity> = map(PostMapperImpl::fromDto)
 
+fun Post.toEntity(): (Post) -> PostEntity = (PostMapperImpl::fromDto)
+
 object PostMapperImpl : PostMapper {
     override fun fromDto(post: Post) = PostEntity(
         id = post.id,
