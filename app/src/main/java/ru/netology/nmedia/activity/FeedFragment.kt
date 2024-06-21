@@ -122,9 +122,9 @@ class FeedFragment : Fragment() {
         binding.list.adapter = adapter
 
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(
-                Lifecycle.State.STARTED
+                Lifecycle.State.CREATED
             ) {
                 viewModel.data.collect {
                     adapter.submitData(it)
@@ -132,61 +132,53 @@ class FeedFragment : Fragment() {
             }
         }
 
-        lifecycleScope.launch {
+
+        viewLifecycleOwner.lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(
-                Lifecycle.State.STARTED
+                Lifecycle.State.CREATED
             ) {
                 adapter.loadStateFlow.collectLatest {
                     binding.swiper.isRefreshing = it.refresh is LoadState.Loading
                             || it.append is LoadState.Loading
-                            || it.prepend is LoadState.Loading
                 }
             }
         }
 
-//            viewModel.newerCount.observe(viewLifecycleOwner) {
-//                if (it != null && it > 0) {
-//                    binding.newPosts.text = getString(R.string.new_posts, it.toString())
-//                    binding.newPosts.visibility = View.VISIBLE
-//                }
-//
-//            }
-
-            viewModel.dataState.observe(viewLifecycleOwner) { state ->
-                binding.progress.isVisible = state.loading
-                if (state.error) {
-                    Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
-                        .setAction(R.string.retry_loading) {
-                            viewModel.loadPosts()
-                        }
-                        .setAnchorView(binding.add)
-                        .show()
-                }
-            }
-
-            binding.swiper.setOnRefreshListener {
-                adapter.refresh()
-                binding.swiper.isRefreshing = false
-                binding.newPosts.visibility = View.GONE
-            }
-
-            binding.newPosts.setOnClickListener {
-                viewModel.showAll()
-                binding.newPosts.visibility = View.GONE
-            }
-
-
-            binding.add.setOnClickListener {
-                viewModel.isLogin.observe(viewLifecycleOwner) { state ->
-                    if (!state) {
-                        findNavController().navigate(R.id.action_feedFragment_to_loginFragment)
-                    } else {
-                        viewModel.dropPhoto()
-                        findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
+        viewModel.dataState.observe(viewLifecycleOwner) { state ->
+            binding.progress.isVisible = state.loading
+            if (state.error) {
+                Snackbar.make(binding.root, R.string.error_loading, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.retry_loading) {
+                        viewModel.synchronizePosts()
                     }
+                    .setAnchorView(binding.add)
+                    .show()
+            }
+        }
+
+        binding.swiper.setOnRefreshListener {
+            adapter.refresh()
+            binding.swiper.isRefreshing = false
+            binding.newPosts.visibility = View.GONE
+        }
+
+        binding.newPosts.setOnClickListener {
+            viewModel.showAll()
+            binding.newPosts.visibility = View.GONE
+        }
+
+
+        binding.add.setOnClickListener {
+            viewModel.isLogin.observe(viewLifecycleOwner) { state ->
+                if (!state) {
+                    findNavController().navigate(R.id.action_feedFragment_to_loginFragment)
+                } else {
+                    viewModel.dropPhoto()
+                    findNavController().navigate(R.id.action_feedFragment_to_newPostFragment)
                 }
             }
-
         }
+
     }
+}
 

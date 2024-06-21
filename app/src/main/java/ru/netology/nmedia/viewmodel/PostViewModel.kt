@@ -96,10 +96,6 @@ class PostViewModel @Inject constructor(
         _photo.value = PhotoModel()
     }
 
-    init {
-        loadPosts()
-    }
-
     fun edit(post: Post) {
         edited.value = post
     }
@@ -108,10 +104,10 @@ class PostViewModel @Inject constructor(
         edited.value = empty
     }
 
-    fun loadPosts() = viewModelScope.launch {
+    fun synchronizePosts() = viewModelScope.launch {
         try {
             _dataState.value = FeedModelState(loading = true)
-            repository.getAll()
+            repository.synchronizePosts()
             repository.showAll()
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
@@ -133,7 +129,9 @@ class PostViewModel @Inject constructor(
 
     fun likeById(post: Post) = viewModelScope.launch {
         try {
+            if (_dataState.value != FeedModelState() && _dataState.value != null) return@launch
             _dataState.value = FeedModelState(loading = true)
+            repository.synchronizeById(post.id)
             repository.likeById(post)
             _dataState.value = FeedModelState()
         } catch (e: Exception) {
@@ -194,18 +192,15 @@ class PostViewModel @Inject constructor(
     }
 
 
-//
-//    fun shareById(post: Post) = viewModelScope.launch {
-//        _data.value = _data.value?.copy(load = true)
-//        val result = repository.shareById(post)
-//        val posts = _data.value?.posts.orEmpty().map {
-//            if (it.id == result.id) result else it
-//        }
-//        _data.value = FeedModel(posts = posts, empty = posts.isEmpty())
-//    }
-//
-//
-
-//
-
+    fun shareById(post: Post) = viewModelScope.launch {
+        try {
+            if (_dataState.value != FeedModelState() && _dataState.value != null) return@launch
+            _dataState.value = FeedModelState(loading = true)
+            repository.synchronizeById(post.id)
+            repository.shareById(post)
+            _dataState.value = FeedModelState()
+        } catch (e: Exception) {
+            _dataState.value = FeedModelState(error = true)
+        }
+    }
 }

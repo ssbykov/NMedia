@@ -1,7 +1,6 @@
 package ru.netology.nmedia.repository
 
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.filter
 import androidx.paging.map
 import kotlinx.coroutines.Dispatchers
@@ -35,17 +34,14 @@ import javax.inject.Inject
 
 class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    private val appAuth: AppAuth,
+    pager: Pager<Int, PostEntity>
 ) : PostRepository {
 
-    @Inject
-    lateinit var appAuth: AppAuth
-
     val postEntites = dao.getAll()
-    override val data = Pager(
-        config = PagingConfig(pageSize = 10, enablePlaceholders = false, maxSize = 30),
-        pagingSourceFactory = { dao.getAllVisibleSource() }
-    ).flow.map { pagingData ->
+
+    override val data = pager.flow.map { pagingData ->
         pagingData
             .filter { it.state != StateType.DELETED }
             .map { postEntity ->
@@ -53,25 +49,9 @@ class PostRepositoryImpl @Inject constructor(
             }
     }
 
-    override suspend fun getAll() {
+    override suspend fun synchronizePosts() {
         val postEntites = dao.getAllSync()
-        val localSynchronizedPosts = postEntites.filter { it.state != StateType.NEW }
         synchronize(postEntites, dao, apiService)
-        try {
-            val response =
-                apiService.getNewer(localSynchronizedPosts.firstOrNull()?.id ?: 0)
-            if (!response.isSuccessful) throw ApiError(response.code(), response.message())
-            val newPosts = response.body() ?: throw UnknownError
-            insertNewApiPosts(newPosts)
-        } catch (e: IOException) {
-            throw NetworkError
-
-        } catch (e: ApiError) {
-            throw e
-
-        } catch (e: Exception) {
-            throw UnknownError
-        }
     }
 
     override fun getNewerCount(id: Long): Flow<Int> = flow {
@@ -146,7 +126,22 @@ class PostRepositoryImpl @Inject constructor(
     }
 
     override suspend fun shareById(post: Post) {
-        apiService.save(post.copy(shares = post.shares + 1))
+        val postEntity = dao.getById(post.id)
+        if (postEntity?.state == null) {
+            try {
+                val response = apiService.save(post.copy(shares = post.shares + 1))
+                if (!response.isSuccessful) throw ApiError(response.code(), response.message())
+                dao.insert(PostMapperImpl.fromDto(requireNotNull(response.body())))
+            } catch (e: IOException) {
+                throw NetworkError
+
+            } catch (e: ApiError) {
+                throw e
+
+            } catch (e: Exception) {
+                throw UnknownError
+            }
+        }
     }
 
 
@@ -250,6 +245,13 @@ class PostRepositoryImpl @Inject constructor(
 
         } catch (e: Exception) {
             throw UnknownError
+        }
+    }
+
+    override suspend fun synchronizeById(id: Long) {
+        val postEntity = getById(id)
+        if (postEntity != null) {
+            synchronize(listOf(postEntity), dao, apiService)
         }
     }
 

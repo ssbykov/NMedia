@@ -14,7 +14,7 @@ interface PostDao {
     fun getAll(): Flow<List<PostEntity>>
 
     @Query("SELECT * FROM PostEntity WHERE visible = 1 ORDER BY id DESC")
-    fun getAllVisibleSource(): PagingSource<Int, PostEntity>
+    fun getPagingSource(): PagingSource<Int, PostEntity>
 
     @Query("SELECT * FROM PostEntity WHERE visible = 1 ORDER BY id DESC")
     fun getAllVisible(): Flow<List<PostEntity>>
@@ -65,4 +65,7 @@ interface PostDao {
         """SELECT MAX(id) FROM PostEntity;"""
     )
     suspend fun getLastId(): Long?
+
+    @Query("DELETE FROM PostEntity")
+    suspend fun clear()
 }
