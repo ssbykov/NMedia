@@ -13,6 +13,7 @@ import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostRemoteKeyEntity
 import ru.netology.nmedia.entity.toEntity
 import ru.netology.nmedia.error.ApiError
+import kotlin.coroutines.cancellation.CancellationException
 
 @OptIn(ExperimentalPagingApi::class)
 class PostRemoteMediator(
@@ -99,7 +100,10 @@ class PostRemoteMediator(
                 postDao.insert(body.toEntity())
             }
             return MediatorResult.Success(body.isEmpty())
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
+
             return MediatorResult.Error(e)
         }
     }
