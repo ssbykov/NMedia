@@ -1,5 +1,8 @@
 package ru.netology.nmedia.repository
 
+import android.os.Build
+import android.provider.ContactsContract.RawContacts.Data
+import androidx.annotation.RequiresApi
 import androidx.paging.Pager
 import androidx.paging.PagingData
 import androidx.paging.filter
@@ -24,6 +27,7 @@ import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.TimingSeparator
 import ru.netology.nmedia.dto.Token
 import ru.netology.nmedia.entity.PostEntity
 import ru.netology.nmedia.entity.PostMapperImpl
@@ -34,6 +38,9 @@ import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
+import java.time.LocalDate
+import java.util.Date
+import java.util.GregorianCalendar
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -46,10 +53,24 @@ class PostRepositoryImpl @Inject constructor(
 
     val postEntites = dao.getAll()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override val data: Flow<PagingData<FeedItem>> = pager.flow.map { pagingData ->
         pagingData
             .filter { it.state != StateType.DELETED }
             .map(PostMapperImpl::toDto)
+//            .insertSeparators { previous, next ->
+//                val calendar = GregorianCalendar.getInstance()
+//                c
+//                val previousTime = previous?.published ?: 0
+//                val nextTime = previous?.published ?: currentTime
+//                if ((currentTime - 48 * 3600) in (previousTime..nextTime)) {
+//                    TimingSeparator(Random.nextLong(), "На прошлой неделе")
+//                } else if ((currentTime - 24 * 3600) in (previousTime..nextTime)) {
+//                    TimingSeparator(Random.nextLong(), "Вчера")
+//                } else if (next == null && (currentTime - previousTime) < 24 * 3600) {
+//                    TimingSeparator(Random.nextLong(), "Сегодня")
+//                } else null
+//            }
             .insertSeparators { previous, _ ->
                 if (previous?.id?.rem(5) == 0L) {
                     Ad(Random.nextLong(), "figma.jpg")

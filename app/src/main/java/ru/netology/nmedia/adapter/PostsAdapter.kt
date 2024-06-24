@@ -16,9 +16,11 @@ import ru.netology.nmedia.Constants.SDRF
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.AdCardBinding
 import ru.netology.nmedia.databinding.PostCardBinding
+import ru.netology.nmedia.databinding.TimingSeparatorCardBinding
 import ru.netology.nmedia.dto.Ad
 import ru.netology.nmedia.dto.FeedItem
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.TimingSeparator
 import ru.netology.nmedia.utils.formatCount
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -32,6 +34,7 @@ class PostsAdapter(
         return when (getItem(position)) {
             is Ad -> R.layout.ad_card
             is Post -> R.layout.post_card
+            is TimingSeparator -> R.layout.timing_separator_card
             null -> error("unknown view type")
         }
     }
@@ -57,7 +60,9 @@ class PostsAdapter(
         when (val item = getItem(position)) {
             is Ad -> (holder as AdViewHolder).bind(item)
             is Post -> (holder as PostViewHolder).bind(item)
+            is TimingSeparator -> (holder as TimingSeparatorViewHolder).bind(item)
             null -> error("unknown item type")
+
         }
     }
 }
@@ -81,6 +86,14 @@ class AdViewHolder(
             .error(R.drawable.ic_error_100dp)
             .timeout(30_000)
             .into(binding.imageAd)
+    }
+}
+
+class TimingSeparatorViewHolder(
+    private val binding: TimingSeparatorCardBinding,
+) : RecyclerView.ViewHolder(binding.root) {
+    fun bind(timingSeparator: TimingSeparator) {
+        binding.separator.text = timingSeparator.period
     }
 }
 
