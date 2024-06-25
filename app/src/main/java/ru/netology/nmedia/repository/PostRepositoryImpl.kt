@@ -63,7 +63,6 @@ class PostRepositoryImpl @Inject constructor(
     private val LAST_WEEK = 48 * 3600
     private val YESTERDAY = 24 * 3600
 
-    @RequiresApi(Build.VERSION_CODES.O)
     override val data: Flow<PagingData<FeedItem>> = pager.flow.map { pagingData ->
         pagingData
             .filter { it.state != StateType.DELETED }
