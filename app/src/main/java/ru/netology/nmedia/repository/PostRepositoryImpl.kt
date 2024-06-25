@@ -1,5 +1,6 @@
 package ru.netology.nmedia.repository
 
+import android.content.Context
 import android.os.Build
 import android.provider.ContactsContract.RawContacts.Data
 import androidx.annotation.RequiresApi
@@ -8,6 +9,7 @@ import androidx.paging.PagingData
 import androidx.paging.filter
 import androidx.paging.insertSeparators
 import androidx.paging.map
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -20,6 +22,8 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
+import ru.netology.nmedia.Constants.SDRF
+import ru.netology.nmedia.R
 import ru.netology.nmedia.api.ApiService
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dao.PostDao
@@ -38,9 +42,11 @@ import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.error.NetworkError
 import ru.netology.nmedia.error.UnknownError
 import java.io.File
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Date
 import java.util.GregorianCalendar
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.random.Random
 
@@ -48,29 +54,32 @@ class PostRepositoryImpl @Inject constructor(
     private val dao: PostDao,
     private val apiService: ApiService,
     private val appAuth: AppAuth,
-    pager: Pager<Int, PostEntity>
+    @ApplicationContext
+    private val context: Context,
+    pager: Pager<Int, PostEntity>,
 ) : PostRepository {
 
     val postEntites = dao.getAll()
+    private val LAST_WEEK = 48 * 3600
+    private val YESTERDAY = 24 * 3600
 
     @RequiresApi(Build.VERSION_CODES.O)
     override val data: Flow<PagingData<FeedItem>> = pager.flow.map { pagingData ->
         pagingData
             .filter { it.state != StateType.DELETED }
             .map(PostMapperImpl::toDto)
-//            .insertSeparators { previous, next ->
-//                val calendar = GregorianCalendar.getInstance()
-//                c
-//                val previousTime = previous?.published ?: 0
-//                val nextTime = previous?.published ?: currentTime
-//                if ((currentTime - 48 * 3600) in (previousTime..nextTime)) {
-//                    TimingSeparator(Random.nextLong(), "На прошлой неделе")
-//                } else if ((currentTime - 24 * 3600) in (previousTime..nextTime)) {
-//                    TimingSeparator(Random.nextLong(), "Вчера")
-//                } else if (next == null && (currentTime - previousTime) < 24 * 3600) {
-//                    TimingSeparator(Random.nextLong(), "Сегодня")
-//                } else null
-//            }
+            .insertSeparators { previous, next ->
+                val currentTime = System.currentTimeMillis() / 1000
+                val previousTime = previous?.published ?: currentTime
+                val nextTime = next?.published ?: currentTime / 1000
+                if ((currentTime - LAST_WEEK) in (nextTime..previousTime)) {
+                    TimingSeparator(Random.nextLong(), context.getString(R.string.last_week))
+                } else if ((currentTime - YESTERDAY) in (nextTime..previousTime)) {
+                    TimingSeparator(Random.nextLong(), context.getString(R.string.yesterday))
+                } else if (previous == null && (currentTime - nextTime) < YESTERDAY) {
+                    TimingSeparator(Random.nextLong(), context.getString(R.string.today))
+                } else null
+            }
             .insertSeparators { previous, _ ->
                 if (previous?.id?.rem(5) == 0L) {
                     Ad(Random.nextLong(), "figma.jpg")

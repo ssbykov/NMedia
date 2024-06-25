@@ -53,6 +53,12 @@ class PostsAdapter(
                 AdViewHolder(binding)
             }
 
+            R.layout.timing_separator_card -> {
+                val binding =
+                    TimingSeparatorCardBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+                TimingSeparatorViewHolder(binding)
+            }
+
             else -> error("unknown view type $viewType")
         }
 

@@ -59,6 +59,8 @@ class PostRemoteMediator(
 
             val body = response.body().orEmpty()
 
+            if (body.isEmpty()) return MediatorResult.Success(body.isEmpty())
+
             appDb.withTransaction {
                 when (loadType) {
                     LoadType.REFRESH -> {
@@ -103,7 +105,6 @@ class PostRemoteMediator(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-
             return MediatorResult.Error(e)
         }
     }
