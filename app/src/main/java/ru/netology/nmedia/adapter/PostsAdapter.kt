@@ -33,9 +33,8 @@ class PostsAdapter(
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
             is Ad -> R.layout.ad_card
-            is Post -> R.layout.post_card
+            is Post, null -> R.layout.post_card
             is TimingSeparator -> R.layout.timing_separator_card
-            null -> error("unknown view type")
         }
     }
 
@@ -67,8 +66,7 @@ class PostsAdapter(
             is Ad -> (holder as AdViewHolder).bind(item)
             is Post -> (holder as PostViewHolder).bind(item)
             is TimingSeparator -> (holder as TimingSeparatorViewHolder).bind(item)
-            null -> error("unknown item type")
-
+            null -> Unit
         }
     }
 }
