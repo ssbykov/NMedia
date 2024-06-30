@@ -43,4 +43,8 @@
     <string name="exit">ВЫЙТИ</string>
     <string name="no">НЕТ</string>
     <string name="new_notification">Новое уведомление: %1$s</string>
+    <string name="period">Период</string>
+    <string name="last_week">На прошлой неделе</string>
+    <string name="yesterday">Вчера</string>
+    <string name="today">Сегодня</string>
 </resources>

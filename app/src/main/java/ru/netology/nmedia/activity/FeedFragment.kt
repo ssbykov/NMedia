@@ -24,6 +24,8 @@ import kotlinx.coroutines.launch
 import ru.netology.nmedia.Constants.KEY_ATTACHMENT
 import ru.netology.nmedia.Constants.KEY_CONTENT
 import ru.netology.nmedia.R
+import ru.netology.nmedia.adapter.PostLoading
+import ru.netology.nmedia.adapter.PostLoadingStateAdapter
 import ru.netology.nmedia.adapter.PostsAdapter
 import ru.netology.nmedia.adapter.PostsSetupClickListeners
 import ru.netology.nmedia.auth.AppAuth
@@ -139,7 +141,6 @@ class FeedFragment : Fragment() {
             ) {
                 adapter.loadStateFlow.collectLatest {
                     binding.swiper.isRefreshing = it.refresh is LoadState.Loading
-                            || it.append is LoadState.Loading
                 }
             }
         }
@@ -158,7 +159,6 @@ class FeedFragment : Fragment() {
 
         binding.swiper.setOnRefreshListener {
             adapter.refresh()
-            binding.swiper.isRefreshing = false
             binding.newPosts.visibility = View.GONE
         }
 
@@ -178,6 +178,11 @@ class FeedFragment : Fragment() {
                 }
             }
         }
+
+        binding.list.adapter = adapter.withLoadStateHeaderAndFooter(
+            header = PostLoadingStateAdapter { adapter.retry() },
+            footer = PostLoadingStateAdapter { adapter.retry() }
+        )
 
     }
 }
